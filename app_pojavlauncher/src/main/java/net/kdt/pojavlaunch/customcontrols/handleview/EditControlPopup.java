@@ -28,6 +28,8 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.kdt.DefocusableScrollView;
+import com.mio.MioSelectKeyDialog;
+import com.mio.keyconverter.MioKeyConverter;
 
 import net.kdt.pojavlaunch.EfficientAndroidLWJGLKeycode;
 import net.kdt.pojavlaunch.R;
@@ -78,7 +80,7 @@ public class EditControlPopup {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     protected Switch mToggleSwitch, mPassthroughSwitch, mSwipeableSwitch;
     protected Spinner mOrientationSpinner;
-    protected final Spinner[] mKeycodeSpinners = new Spinner[4];
+    protected final EditText[] mKeycodeEditText = new EditText[4];
     protected SeekBar mStrokeWidthSeekbar, mCornerRadiusSeekbar, mAlphaSeekbar;
     protected TextView mStrokePercentTextView, mCornerRadiusPercentTextView, mAlphaPercentTextView;
     protected TextView mSelectBackgroundColor, mSelectStrokeColor;
@@ -87,6 +89,8 @@ public class EditControlPopup {
 
     // Decorative textviews
     private TextView mOrientationTextView, mMappingTextView, mNameTextView, mCornerRadiusTextView;
+
+    private MioSelectKeyDialog mioSelectKeyDialog;
 
 
 
@@ -115,6 +119,7 @@ public class EditControlPopup {
         loadAdapter();
 
         setupRealTimeListeners();
+        mioSelectKeyDialog=new MioSelectKeyDialog(context);
     }
 
 
@@ -208,18 +213,6 @@ public class EditControlPopup {
     }
 
     private void loadAdapter(){
-        //Initialize adapter for keycodes
-        mAdapter = new ArrayAdapter<>(mRootView.getContext(), R.layout.item_centered_textview);
-        mSpecialArray = ControlData.buildSpecialButtonArray();
-
-        mAdapter.addAll(mSpecialArray);
-        mAdapter.addAll(EfficientAndroidLWJGLKeycode.generateKeyName());
-        mAdapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-
-        for (Spinner spinner : mKeycodeSpinners) {
-            spinner.setAdapter(mAdapter);
-        }
-
         // Orientation spinner
         ArrayAdapter<ControlDrawerData.Orientation> adapter = new ArrayAdapter<>(mScrollView.getContext(), android.R.layout.simple_spinner_item);
         adapter.addAll(ControlDrawerData.getOrientations());
@@ -270,11 +263,7 @@ public class EditControlPopup {
         mSwipeableSwitch.setChecked(data.isSwipeable);
 
         for(int i = 0; i< data.keycodes.length; i++){
-            if (data.keycodes[i] < 0) {
-                mKeycodeSpinners[i].setSelection(data.keycodes[i] + mSpecialArray.size());
-            } else {
-                mKeycodeSpinners[i].setSelection(EfficientAndroidLWJGLKeycode.getIndexByValue(data.keycodes[i]) + mSpecialArray.size());
-            }
+            mKeycodeEditText[i].setText(MioKeyConverter.getInstance().keyToName((short) data.keycodes[i]));
         }
     }
 
@@ -286,10 +275,10 @@ public class EditControlPopup {
                 ControlDrawerData.orientationToInt(data.orientation));
 
         mMappingTextView.setVisibility(GONE);
-        mKeycodeSpinners[0].setVisibility(GONE);
-        mKeycodeSpinners[1].setVisibility(GONE);
-        mKeycodeSpinners[2].setVisibility(GONE);
-        mKeycodeSpinners[3].setVisibility(GONE);
+        mKeycodeEditText[0].setVisibility(GONE);
+        mKeycodeEditText[1].setVisibility(GONE);
+        mKeycodeEditText[2].setVisibility(GONE);
+        mKeycodeEditText[3].setVisibility(GONE);
 
         mOrientationTextView.setVisibility(VISIBLE);
         mOrientationSpinner.setVisibility(VISIBLE);
@@ -304,10 +293,10 @@ public class EditControlPopup {
         loadValues(data);
 
         mMappingTextView.setVisibility(GONE);
-        mKeycodeSpinners[0].setVisibility(GONE);
-        mKeycodeSpinners[1].setVisibility(GONE);
-        mKeycodeSpinners[2].setVisibility(GONE);
-        mKeycodeSpinners[3].setVisibility(GONE);
+        mKeycodeEditText[0].setVisibility(GONE);
+        mKeycodeEditText[1].setVisibility(GONE);
+        mKeycodeEditText[2].setVisibility(GONE);
+        mKeycodeEditText[3].setVisibility(GONE);
 
         mNameTextView.setVisibility(GONE);
         mNameEditText.setVisibility(GONE);
@@ -330,10 +319,10 @@ public class EditControlPopup {
         mToggleSwitch = mScrollView.findViewById(R.id.checkboxToggle);
         mPassthroughSwitch = mScrollView.findViewById(R.id.checkboxPassThrough);
         mSwipeableSwitch = mScrollView.findViewById(R.id.checkboxSwipeable);
-        mKeycodeSpinners[0] = mScrollView.findViewById(R.id.editMapping_spinner_1);
-        mKeycodeSpinners[1] = mScrollView.findViewById(R.id.editMapping_spinner_2);
-        mKeycodeSpinners[2] = mScrollView.findViewById(R.id.editMapping_spinner_3);
-        mKeycodeSpinners[3] = mScrollView.findViewById(R.id.editMapping_spinner_4);
+        mKeycodeEditText[0] = mScrollView.findViewById(R.id.editMapping_edittext_1);
+        mKeycodeEditText[1] = mScrollView.findViewById(R.id.editMapping_edittext_2);
+        mKeycodeEditText[2] = mScrollView.findViewById(R.id.editMapping_edittext_3);
+        mKeycodeEditText[3] = mScrollView.findViewById(R.id.editMapping_edittext_4);
         mOrientationSpinner = mScrollView.findViewById(R.id.editOrientation_spinner);
         mStrokeWidthSeekbar = mScrollView.findViewById(R.id.editStrokeWidth_seekbar);
         mCornerRadiusSeekbar = mScrollView.findViewById(R.id.editCornerRadius_seekbar);
@@ -468,22 +457,17 @@ public class EditControlPopup {
         });
 
 
-        for(int i = 0; i< mKeycodeSpinners.length; ++i){
+        for(int i = 0; i< mKeycodeEditText.length; ++i){
             int finalI = i;
-            mKeycodeSpinners[i].setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    // Side note, spinner listeners are fired later than all the other ones.
-                    // Meaning the internalChanges bool is useless here.
-                    if (position < mSpecialArray.size()) {
-                        mCurrentlyEditedButton.getProperties().keycodes[finalI] = mKeycodeSpinners[finalI].getSelectedItemPosition() - mSpecialArray.size();
-                    } else {
-                        mCurrentlyEditedButton.getProperties().keycodes[finalI] = EfficientAndroidLWJGLKeycode.getValueByIndex(mKeycodeSpinners[finalI].getSelectedItemPosition() - mSpecialArray.size());
+            mKeycodeEditText[i].setFocusable(false);
+            mKeycodeEditText[i].setOnClickListener(v->{
+                mioSelectKeyDialog.show(new MioSelectKeyDialog.CallBack() {
+                    @Override
+                    public void onSelected(String name) {
+                        mKeycodeEditText[finalI].setText(name);
+                        mCurrentlyEditedButton.getProperties().keycodes[finalI] = MioKeyConverter.getInstance().nameToKey(name);
                     }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
+                });
             });
         }
 
