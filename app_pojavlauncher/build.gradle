@@ -167,5 +167,7 @@ dependencies {
     implementation 'com.github.PojavLauncherTeam:exp4j:60eaec6f78'
     // implementation 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.0'
 
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

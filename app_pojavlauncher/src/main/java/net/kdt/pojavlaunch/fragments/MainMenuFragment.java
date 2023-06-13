@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 
+import com.mio.fragments.MioPlusFragment;
+
 import net.kdt.pojavlaunch.CustomControlsActivity;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
@@ -36,6 +38,7 @@ public class MainMenuFragment extends Fragment {
         Button mCustomControlButton = view.findViewById(R.id.custom_control_button);
         Button mInstallJarButton = view.findViewById(R.id.install_jar_button);
         Button mShareLogsButton = view.findViewById(R.id.share_logs_button);
+        Button mMioPlusButton = view.findViewById(R.id.mio_plus_button);
 
         ImageButton mEditProfileButton = view.findViewById(R.id.edit_profile_button);
         Button mPlayButton = view.findViewById(R.id.play_button);
@@ -52,6 +55,8 @@ public class MainMenuFragment extends Fragment {
         mPlayButton.setOnClickListener(v -> ExtraCore.setValue(ExtraConstants.LAUNCH_GAME, true));
 
         mShareLogsButton.setOnClickListener((v) -> shareLog(requireContext()));
+
+        mMioPlusButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(), MioPlusFragment.class, MioPlusFragment.TAG, true, null));
     }
     private void runInstallerWithConfirmation(boolean isCustomArgs) {
         if (ProgressKeeper.getTaskCount() == 0)

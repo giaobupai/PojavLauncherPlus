@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_menu_main"
+    android:gravity="top"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@color/background_app">
+
+    <com.kdt.mcgui.LauncherMenuButton
+        android:id="@+id/change_download_source_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_66sdp"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="切换下载源(当前为官方源)"
+        android:drawableStart="@drawable/ic_menu_news"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.kdt.mcgui.LauncherMenuButton
+        android:id="@+id/download_forge_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_66sdp"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="下载forge"
+        android:drawableStart="@drawable/forge"
+        app:layout_constraintTop_toBottomOf="@id/change_download_source_button"/>
+
+    <com.kdt.mcgui.LauncherMenuButton
+        android:id="@+id/download_fabric_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_66sdp"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="下载fabric"
+        android:drawableStart="@drawable/fabric"
+        app:layout_constraintTop_toBottomOf="@id/download_forge_button"/>
+
+    <com.kdt.mcgui.LauncherMenuButton
+        android:id="@+id/download_optfine_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_66sdp"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="下载高清修复"
+        android:drawableStart="@drawable/optfine"
+        app:layout_constraintTop_toBottomOf="@id/download_fabric_button"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
+

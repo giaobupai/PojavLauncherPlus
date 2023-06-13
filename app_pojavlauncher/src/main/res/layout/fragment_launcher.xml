@@ -55,6 +55,17 @@
 		app:layout_constraintTop_toBottomOf="@id/install_jar_button"
 		/>
 
+	<com.kdt.mcgui.LauncherMenuButton
+		android:id="@+id/mio_plus_button"
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/_66sdp"
+		android:background="?android:attr/selectableItemBackground"
+		android:drawableStart="@drawable/mio"
+		android:text="澪增强版功能"
+
+		app:layout_constraintTop_toBottomOf="@id/share_logs_button"
+		/>
+
 
 	<com.kdt.mcgui.mcVersionSpinner
 		android:id="@+id/mc_version_spinner"
