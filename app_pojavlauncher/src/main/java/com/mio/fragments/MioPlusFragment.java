@@ -31,7 +31,9 @@ import net.kdt.pojavlaunch.utils.DownloadUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class MioPlusFragment extends Fragment {
@@ -39,7 +41,7 @@ public class MioPlusFragment extends Fragment {
 
     private ProgressDialog progressDialog;
 
-    public MioPlusFragment(){
+    public MioPlusFragment() {
         super(R.layout.fragment_mio_plus);
     }
 
@@ -47,7 +49,7 @@ public class MioPlusFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        progressDialog=new ProgressDialog(requireContext());
+        progressDialog = new ProgressDialog(requireContext());
         progressDialog.setCancelable(false);
         progressDialog.setCanceledOnTouchOutside(false);
 
@@ -56,140 +58,171 @@ public class MioPlusFragment extends Fragment {
         Button downloadFabricButton = view.findViewById(R.id.download_fabric_button);
         Button downloadOptfineButton = view.findViewById(R.id.download_optfine_button);
 
-        String[] sourceItems=new String[]{"官方源","BMCLAPI","MCBBS"};
-        changeDownloadSourceButton.setText("切换下载源(当前为"+sourceItems[LauncherPreferences.DEFAULT_PREF.getInt("downloadSource",0)]+")");
-        changeDownloadSourceButton.setOnClickListener(v->{
-            AlertDialog dialog=new AlertDialog.Builder(requireContext())
+        String[] sourceItems = new String[]{"官方源", "BMCLAPI", "MCBBS"};
+        changeDownloadSourceButton.setText("切换下载源(当前为" + sourceItems[LauncherPreferences.DEFAULT_PREF.getInt("downloadSource", 0)] + ")");
+        changeDownloadSourceButton.setOnClickListener(v -> {
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
                     .setTitle("请选择")
-                    .setItems(sourceItems,(d,i)->{
+                    .setItems(sourceItems, (d, i) -> {
                         SharedPreferences.Editor editor = LauncherPreferences.DEFAULT_PREF.edit();
-                        editor.putInt("downloadSource",i);
+                        editor.putInt("downloadSource", i);
                         editor.commit();
-                        changeDownloadSourceButton.setText("切换下载源(当前为"+sourceItems[i]+")");
-                    }).setNegativeButton("取消",null)
+                        changeDownloadSourceButton.setText("切换下载源(当前为" + sourceItems[i] + ")");
+                    }).setNegativeButton("取消", null)
                     .create();
             dialog.show();
         });
-        downloadForgeButton.setOnClickListener(v->{
+        downloadForgeButton.setOnClickListener(v -> {
             progressDialog.show();
             JMinecraftVersionList versionList = (JMinecraftVersionList) ExtraCore.getValue(ExtraConstants.RELEASE_TABLE);
-            List<String> list=new ArrayList<>();
-            for (JMinecraftVersionList.Version version:versionList.versions){
-                if (version.type.equals("release")){
+            List<String> list = new ArrayList<>();
+            for (JMinecraftVersionList.Version version : versionList.versions) {
+                if (version.type.equals("release")) {
                     list.add(version.id);
                 }
             }
-            String[] items=list.toArray(new String[0]);
+            String[] items = list.toArray(new String[0]);
             progressDialog.dismiss();
-            AlertDialog dialog=new AlertDialog.Builder(requireContext())
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
                     .setTitle("请选择版本")
                     .setItems(items, (dialogInterface, i) -> {
                         progressDialog.show();
-                        new Thread(()->{
-                            ForgeDownload forgeDownload=new ForgeDownload(items[i]);
+                        new Thread(() -> {
+                            ForgeDownload forgeDownload = new ForgeDownload(items[i]);
                             List<String> forgeList = forgeDownload.getForgeVersions();
-                            Collections.reverse(forgeList);
-                            String[] forgeItems=forgeList.toArray(new String[0]);
-                            requireActivity().runOnUiThread(()->{
+                            String[] forgeItems = forgeList.toArray(new String[0]);
+                            Arrays.sort(forgeItems, (o1, o2) -> {
+                                if (!isHigher(o1, o2)) {
+                                    return 1;
+                                } else {
+                                    return -1;
+                                }
+                            });
+                            requireActivity().runOnUiThread(() -> {
                                 progressDialog.dismiss();
-                                AlertDialog tempDialog=new AlertDialog.Builder(requireContext())
+                                AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
                                         .setTitle("请选择Forge版本")
                                         .setItems(forgeItems, (d, j) -> {
                                             download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/forge-installer-" + forgeItems[j] + ".jar");
                                         })
-                                        .setNegativeButton("取消",null)
+                                        .setNegativeButton("取消", null)
                                         .create();
                                 tempDialog.show();
                             });
                         }).start();
                     })
-                    .setNegativeButton("取消",null)
+                    .setNegativeButton("取消", null)
                     .create();
             dialog.show();
         });
 
-        downloadFabricButton.setOnClickListener(v->{
+        downloadFabricButton.setOnClickListener(v -> {
             progressDialog.show();
-            new Thread(()->{
-                FabricDownload fabricDownload=new FabricDownload();
-                List<String> fabricList=fabricDownload.getInstallerVersion();
-                String[] items=fabricList.toArray(new String[0]);
-                requireActivity().runOnUiThread(()->{
+            new Thread(() -> {
+                FabricDownload fabricDownload = new FabricDownload();
+                List<String> fabricList = fabricDownload.getInstallerVersion();
+                String[] items = fabricList.toArray(new String[0]);
+                requireActivity().runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                    AlertDialog dialog = new AlertDialog.Builder(requireContext())
                             .setTitle("请选择fabric版本")
                             .setItems(items, (dialogInterface, i) -> {
-                                download(fabricDownload.getDownloadLink(items[i]),Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar");
+                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar");
                             })
-                            .setNegativeButton("取消",null)
+                            .setNegativeButton("取消", null)
                             .create();
                     dialog.show();
                 });
             }).start();
         });
-        downloadOptfineButton.setOnClickListener(v->{
+        downloadOptfineButton.setOnClickListener(v -> {
             progressDialog.show();
             JMinecraftVersionList versionList = (JMinecraftVersionList) ExtraCore.getValue(ExtraConstants.RELEASE_TABLE);
-            List<String> list=new ArrayList<>();
-            for (JMinecraftVersionList.Version version:versionList.versions){
-                if (version.type.equals("release")){
+            List<String> list = new ArrayList<>();
+            for (JMinecraftVersionList.Version version : versionList.versions) {
+                if (version.type.equals("release")) {
                     list.add(version.id);
                 }
             }
-            String[] items=list.toArray(new String[0]);
+            String[] items = list.toArray(new String[0]);
             progressDialog.dismiss();
-            AlertDialog dialog=new AlertDialog.Builder(requireContext())
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
                     .setTitle("请选择版本")
                     .setItems(items, (dialogInterface, i) -> {
                         progressDialog.show();
-                        new Thread(()->{
-                            OptifineDownload optifineDownload=new OptifineDownload(items[i]);
+                        new Thread(() -> {
+                            OptifineDownload optifineDownload = new OptifineDownload(items[i]);
                             List<String> optList = optifineDownload.getVersion();
                             Collections.reverse(optList);
-                            String[] optItems=optList.toArray(new String[0]);
-                            requireActivity().runOnUiThread(()->{
+                            String[] optItems = optList.toArray(new String[0]);
+                            requireActivity().runOnUiThread(() -> {
                                 progressDialog.dismiss();
-                                AlertDialog tempDialog=new AlertDialog.Builder(requireContext())
+                                AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
                                         .setTitle("请选择高清修复版本")
                                         .setItems(optItems, (d, j) -> {
-                                            download(optifineDownload.getDownloadLink(optItems[j]), Tools.DIR_GAME_HOME + "/optfine-" + optItems[j].replace("/","-") + ".jar");
+                                            download(optifineDownload.getDownloadLink(optItems[j]), Tools.DIR_GAME_HOME + "/optfine-" + optItems[j].replace("/", "-") + ".jar");
                                         })
-                                        .setNegativeButton("取消",null)
+                                        .setNegativeButton("取消", null)
                                         .create();
                                 tempDialog.show();
                             });
                         }).start();
                     })
-                    .setNegativeButton("取消",null)
+                    .setNegativeButton("取消", null)
                     .create();
             dialog.show();
         });
     }
-    private void download(String url,String dest){
-        progressDialog=new ProgressDialog(requireContext());
+
+    private void download(String url, String dest) {
+        progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("下载进度：0%");
         progressDialog.show();
-        new Thread(()->{
+        new Thread(() -> {
             try {
-                DownloadUtils.downloadFileMonitored(url,dest, new byte[1024], new Tools.DownloaderFeedback() {
-                    @Override
-                    public void updateProgress(int curr, int max) {
-                        requireActivity().runOnUiThread(()->{
-                            int percent=curr*100/max;
-                            progressDialog.setTitle("下载进度："+percent+"%");
-                            if(percent==100){
-                                progressDialog.dismiss();
-                                progressDialog=new ProgressDialog(requireContext());
-                                Intent intent = new Intent(requireActivity(), JavaGUILauncherActivity.class);
-                                intent.putExtra("modFile", new File(dest));
-                                requireActivity().startActivity(intent);
-                            }
-                        });
+                DownloadUtils.downloadFileMonitored(url, dest, new byte[1024], (curr, max) -> requireActivity().runOnUiThread(() -> {
+                    int percent = curr * 100 / max;
+                    progressDialog.setTitle("下载进度：" + percent + "%");
+                    if (percent == 100) {
+                        progressDialog.dismiss();
+                        progressDialog = new ProgressDialog(requireContext());
+                        Intent intent = new Intent(requireActivity(), JavaGUILauncherActivity.class);
+                        intent.putExtra("modFile", new File(dest));
+                        requireActivity().startActivity(intent);
                     }
-                });
+                }));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }).start();
+    }
+
+    public static boolean isHigher(String version1, String version2) {
+        if (version1.equals(version2)) {
+            return false;
+        }
+        String[] version1Array = version1.split("\\.");
+        String[] version2Array = version2.split("\\.");
+        int index = 0;
+        int minLen = Math.min(version1Array.length, version2Array.length);
+        int diff = 0;
+        while (index < minLen && (diff = Integer.parseInt(version1Array[index]) - Integer.parseInt(version2Array[index])) == 0) {
+            index++;
+        }
+        if (diff == 0) {
+            for (int i = index; i < version1Array.length; i++) {
+                if (Integer.parseInt(version1Array[i]) > 0) {
+                    return true;
+                }
+            }
+            for (int i = index; i < version2Array.length; i++) {
+                if (Integer.parseInt(version2Array[i]) > 0) {
+                    return false;
+                }
+            }
+            return false;
+        } else {
+            return diff > 0 ? true : false;
+        }
     }
 }

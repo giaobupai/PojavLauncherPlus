@@ -76,7 +76,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         versionCode getDateSeconds()
-        versionName getVersionName()
+        versionName "mioplus-1.0"//getVersionName()
         multiDexEnabled true //important
     }
 
