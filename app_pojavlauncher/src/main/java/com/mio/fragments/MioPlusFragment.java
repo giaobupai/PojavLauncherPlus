@@ -3,6 +3,7 @@ package com.mio.fragments;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,7 @@ import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
+import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
 
@@ -54,8 +56,19 @@ public class MioPlusFragment extends Fragment {
         Button downloadFabricButton = view.findViewById(R.id.download_fabric_button);
         Button downloadOptfineButton = view.findViewById(R.id.download_optfine_button);
 
+        String[] sourceItems=new String[]{"官方源","BMCLAPI","MCBBS"};
+        changeDownloadSourceButton.setText("切换下载源(当前为"+sourceItems[LauncherPreferences.DEFAULT_PREF.getInt("downloadSource",0)]+")");
         changeDownloadSourceButton.setOnClickListener(v->{
-
+            AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                    .setTitle("请选择")
+                    .setItems(sourceItems,(d,i)->{
+                        SharedPreferences.Editor editor = LauncherPreferences.DEFAULT_PREF.edit();
+                        editor.putInt("downloadSource",i);
+                        editor.commit();
+                        changeDownloadSourceButton.setText("切换下载源(当前为"+sourceItems[i]+")");
+                    }).setNegativeButton("取消",null)
+                    .create();
+            dialog.show();
         });
         downloadForgeButton.setOnClickListener(v->{
             progressDialog.show();

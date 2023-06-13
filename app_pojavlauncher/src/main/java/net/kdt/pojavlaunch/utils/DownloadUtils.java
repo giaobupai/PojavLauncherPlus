@@ -1,11 +1,15 @@
 package net.kdt.pojavlaunch.utils;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import java.io.*;
 import java.net.*;
 import java.nio.charset.*;
 import net.kdt.pojavlaunch.*;
+import net.kdt.pojavlaunch.prefs.LauncherPreferences;
+
 import org.apache.commons.io.*;
 
 @SuppressWarnings("IOStreamConstructor")
@@ -96,6 +100,20 @@ public class DownloadUtils {
         if (!outputFile.exists()) {
             outputFile.getParentFile().mkdirs();
         }
+        //patch start
+        int source= LauncherPreferences.DEFAULT_PREF.getInt("downloadSource",0);
+        if (source!=0&&!urlInput.contains("platform")){
+            String assets="resources.download.minecraft.net";
+            String libraries="libraries.minecraft.net";
+            if (source==1){
+                urlInput=urlInput.replace(assets,"bmclapi2.bangbang93.com/assets");
+                urlInput=urlInput.replace(libraries,"bmclapi2.bangbang93.com/maven");
+            } else {
+                urlInput=urlInput.replace(assets,"download.mcbbs.net/assets");
+                urlInput=urlInput.replace(libraries,"download.mcbbs.net/maven");
+            }
+        }
+        //patch end
 
         HttpURLConnection conn = (HttpURLConnection) new URL(urlInput).openConnection();
         InputStream readStr = conn.getInputStream();
