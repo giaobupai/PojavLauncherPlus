@@ -56,7 +56,12 @@ public class MainMenuFragment extends Fragment {
 
         mShareLogsButton.setOnClickListener((v) -> shareLog(requireContext()));
 
-        mMioPlusButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(), MioPlusFragment.class, MioPlusFragment.TAG, true, null));
+        try{
+            mMioPlusButton.setOnClickListener(v -> Tools.swapFragment(requireActivity(), MioPlusFragment.class, MioPlusFragment.TAG, true, null));
+        }catch (Exception ignored){
+
+        }
+
     }
     private void runInstallerWithConfirmation(boolean isCustomArgs) {
         if (ProgressKeeper.getTaskCount() == 0)
