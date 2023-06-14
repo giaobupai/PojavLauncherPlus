@@ -89,6 +89,13 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         minecraftProfile = LauncherProfiles.getCurrentProfile();
+        if (!new File(Tools.getGameDirPath(minecraftProfile),"options.txt").exists()){
+            try {
+                Tools.copyAssetFile(this, "options.txt", Tools.getGameDirPath(minecraftProfile).getAbsolutePath(), false);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         MCOptionUtils.load(Tools.getGameDirPath(minecraftProfile).getAbsolutePath());
         GameService.startService(this);
         initLayout(R.layout.activity_basemain);
