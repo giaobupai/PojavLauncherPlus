@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -26,6 +27,8 @@ import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
+import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
+import net.kdt.pojavlaunch.value.launcherprofiles.MinecraftProfile;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +36,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class MioPlusFragment extends Fragment {
     public static final String TAG = "MioPlusFragment";
@@ -56,6 +62,9 @@ public class MioPlusFragment extends Fragment {
         Button downloadForgeButton = view.findViewById(R.id.download_forge_button);
         Button downloadFabricButton = view.findViewById(R.id.download_fabric_button);
         Button downloadOptfineButton = view.findViewById(R.id.download_optfine_button);
+        Button customDirButton = view.findViewById(R.id.custom_dir_button);
+        Button modManagerButton = view.findViewById(R.id.mod_manager_button);
+        Button modDownloadButton = view.findViewById(R.id.mod_download_button);
 
         String[] sourceItems = new String[]{"官方源", "BMCLAPI", "MCBBS"};
         changeDownloadSourceButton.setText("切换下载源(当前为" + sourceItems[LauncherPreferences.DEFAULT_PREF.getInt("downloadSource", 0)] + ")");
@@ -175,9 +184,39 @@ public class MioPlusFragment extends Fragment {
                     }).setNegativeButton("取消",null)
                     .create();
             dialog1.show();
-
-
         });
+
+        customDirButton.setOnClickListener(v->{
+            Map<String, MinecraftProfile>  map = LauncherProfiles.mainProfileJson.profiles;
+            Set<String> keys = map.keySet();
+            List<String> list=new ArrayList<>();
+            for (String key:keys){
+                list.add(Objects.requireNonNull(map.get(key)).name);
+            }
+            String[] items=list.toArray(new String[0]);
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setTitle("请选择需要版本隔离的游戏")
+                    .setItems(items,(d,i)->{
+                        String mProfileKey=null;
+                        MinecraftProfile mTempProfile = null;
+                        for (String key:keys){
+                            if(map.get(key).name.equals(items[i])){
+                                mProfileKey=key;
+                                mTempProfile=map.get(key);
+                            }
+                        }
+                        assert mTempProfile != null;
+                        mTempProfile.gameDir="./.minecraft/versions/"+mTempProfile.lastVersionId;
+                        LauncherProfiles.mainProfileJson.profiles.put(mProfileKey, mTempProfile);
+                        LauncherProfiles.update();
+                        ExtraCore.setValue(ExtraConstants.REFRESH_VERSION_SPINNER, mProfileKey);
+                    })
+                    .setNegativeButton("取消",null)
+                    .create();
+            dialog.show();
+        });
+
+
     }
 
     private void download(String url, String dest,boolean install) {
