@@ -1,10 +1,13 @@
 package net.kdt.pojavlaunch;
 
 import static net.kdt.pojavlaunch.MainActivity.INTENT_MINECRAFT_VERSION;
+import static net.kdt.pojavlaunch.PojavApplication.sExecutorService;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +26,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.kdt.mcgui.ProgressLayout;
 import com.kdt.mcgui.mcAccountSpinner;
+import com.mio.fragments.ModManageFragment;
 
 import net.kdt.pojavlaunch.fragments.MainMenuFragment;
 import net.kdt.pojavlaunch.fragments.MicrosoftLoginFragment;
@@ -40,6 +44,13 @@ import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
 import net.kdt.pojavlaunch.tasks.AsyncVersionList;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
 import net.kdt.pojavlaunch.value.launcherprofiles.MinecraftProfile;
+
+import org.apache.commons.io.IOUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class LauncherActivity extends BaseActivity {
     public static final String SETTING_FRAGMENT_TAG = "SETTINGS_FRAGMENT";
@@ -208,6 +219,37 @@ public class LauncherActivity extends BaseActivity {
         }
         if(requestCode == MultiRTConfigDialog.MULTIRT_PICK_RUNTIME && data != null){
             Tools.installRuntimeFromUri(this, data.getData());
+        }
+        if(requestCode == 114514 && data != null){
+            ProgressDialog dialog=new ProgressDialog(this);
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+            sExecutorService.execute(() -> {
+                try {
+                    Uri uri=data.getData();
+                    final String name = Tools.getFileName(LauncherActivity.this, uri);
+                    final File modFile = new File(ModManageFragment.path, name);
+                    if (!modFile.getParentFile().exists()){
+                        modFile.getParentFile().mkdirs();
+                    }
+                    FileOutputStream fos = new FileOutputStream(modFile);
+                    InputStream input = LauncherActivity.this.getContentResolver().openInputStream(uri);
+                    IOUtils.copy(input, fos);
+                    input.close();
+                    fos.close();
+                    LauncherActivity.this.runOnUiThread(() -> {
+                        dialog.dismiss();
+                        ModManageFragment.addModToList(modFile);
+                        Toast.makeText(LauncherActivity.this,"Mod安装完成",Toast.LENGTH_LONG).show();
+                    });
+                }catch(IOException e) {
+                    LauncherActivity.this.runOnUiThread(() -> {
+                        dialog.dismiss();
+                    });
+                    Tools.showError(LauncherActivity.this, e);
+                }
+            });
         }
     }
 
