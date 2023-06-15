@@ -2,7 +2,6 @@ package com.mio.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
-import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
 
 import java.io.File;
@@ -34,7 +32,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class MioPlusFragment extends Fragment {
@@ -68,7 +65,7 @@ public class MioPlusFragment extends Fragment {
                     .setItems(sourceItems, (d, i) -> {
                         SharedPreferences.Editor editor = LauncherPreferences.DEFAULT_PREF.edit();
                         editor.putInt("downloadSource", i);
-                        editor.commit();
+                        editor.apply();
                         changeDownloadSourceButton.setText("切换下载源(当前为" + sourceItems[i] + ")");
                     }).setNegativeButton("取消", null)
                     .create();
@@ -105,7 +102,7 @@ public class MioPlusFragment extends Fragment {
                                 AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
                                         .setTitle("请选择Forge版本")
                                         .setItems(forgeItems, (d, j) -> {
-                                            download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/forge-installer-" + forgeItems[j] + ".jar");
+                                            download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/forge-installer-" + forgeItems[j] + ".jar",true);
                                         })
                                         .setNegativeButton("取消", null)
                                         .create();
@@ -129,7 +126,7 @@ public class MioPlusFragment extends Fragment {
                     AlertDialog dialog = new AlertDialog.Builder(requireContext())
                             .setTitle("请选择fabric版本")
                             .setItems(items, (dialogInterface, i) -> {
-                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar");
+                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar",true);
                             })
                             .setNegativeButton("取消", null)
                             .create();
@@ -138,7 +135,6 @@ public class MioPlusFragment extends Fragment {
             }).start();
         });
         downloadOptfineButton.setOnClickListener(v -> {
-            progressDialog.show();
             JMinecraftVersionList versionList = (JMinecraftVersionList) ExtraCore.getValue(ExtraConstants.RELEASE_TABLE);
             List<String> list = new ArrayList<>();
             for (JMinecraftVersionList.Version version : versionList.versions) {
@@ -146,37 +142,45 @@ public class MioPlusFragment extends Fragment {
                     list.add(version.id);
                 }
             }
-            String[] items = list.toArray(new String[0]);
-            progressDialog.dismiss();
-            AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                    .setTitle("请选择版本")
-                    .setItems(items, (dialogInterface, i) -> {
-                        progressDialog.show();
-                        new Thread(() -> {
-                            OptifineDownload optifineDownload = new OptifineDownload(items[i]);
-                            List<String> optList = optifineDownload.getVersion();
-                            Collections.reverse(optList);
-                            String[] optItems = optList.toArray(new String[0]);
-                            requireActivity().runOnUiThread(() -> {
-                                progressDialog.dismiss();
-                                AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
-                                        .setTitle("请选择高清修复版本")
-                                        .setItems(optItems, (d, j) -> {
-                                            download(optifineDownload.getDownloadLink(optItems[j]), Tools.DIR_GAME_HOME + "/optfine-" + optItems[j].replace("/", "-") + ".jar");
-                                        })
-                                        .setNegativeButton("取消", null)
-                                        .create();
-                                tempDialog.show();
-                            });
-                        }).start();
-                    })
-                    .setNegativeButton("取消", null)
+            String[] versions=new File(Tools.DIR_HOME_VERSION).list();
+            AlertDialog dialog1=new AlertDialog.Builder(requireContext())
+                    .setTitle("请选择高清修复安装的位置")
+                    .setItems(versions,(dd,k)->{
+                        String[] items = list.toArray(new String[0]);
+                        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                                .setTitle("请选择版本")
+                                .setItems(items, (dialogInterface, i) -> {
+                                    progressDialog.show();
+                                    new Thread(() -> {
+                                        OptifineDownload optifineDownload = new OptifineDownload(items[i]);
+                                        List<String> optList = optifineDownload.getVersion();
+                                        Collections.reverse(optList);
+                                        String[] optItems = optList.toArray(new String[0]);
+                                        requireActivity().runOnUiThread(() -> {
+                                            progressDialog.dismiss();
+                                            AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
+                                                    .setTitle("请选择高清修复版本")
+                                                    .setItems(optItems, (d, j) -> {
+                                                        download(optifineDownload.getDownloadLink(optItems[j]), Tools.DIR_HOME_VERSION+"/" +versions[k]+"/mods/" + "/optfine-" + optItems[j].replace("/", "-") + ".jar",false);
+                                                    })
+                                                    .setNegativeButton("取消", null)
+                                                    .create();
+                                            tempDialog.show();
+                                        });
+                                    }).start();
+                                })
+                                .setNegativeButton("取消", null)
+                                .create();
+                        dialog.show();
+                    }).setNegativeButton("取消",null)
                     .create();
-            dialog.show();
+            dialog1.show();
+
+
         });
     }
 
-    private void download(String url, String dest) {
+    private void download(String url, String dest,boolean install) {
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("下载进度：0%");
         progressDialog.show();
@@ -188,9 +192,15 @@ public class MioPlusFragment extends Fragment {
                     if (percent == 100) {
                         progressDialog.dismiss();
                         progressDialog = new ProgressDialog(requireContext());
-                        Intent intent = new Intent(requireActivity(), JavaGUILauncherActivity.class);
-                        intent.putExtra("modFile", new File(dest));
-                        requireActivity().startActivity(intent);
+                        if (install){
+                            Intent intent = new Intent(requireActivity(), JavaGUILauncherActivity.class);
+                            intent.putExtra("modFile", new File(dest));
+                            requireActivity().startActivity(intent);
+                        } else {
+                            requireActivity().runOnUiThread(()->{
+                                Toast.makeText(requireContext(),"下载完成" ,Toast.LENGTH_SHORT).show();
+                            });
+                        }
                     }
                 }));
             } catch (IOException e) {
