@@ -9,4 +9,28 @@
     android:orientation="vertical"
     android:background="@color/background_app">
 
+    <TextView
+        android:id="@+id/text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="当前的游戏版本："/>
+
+    <Spinner
+        android:id="@+id/mod_manage_version_spinner"
+        app:layout_constraintBaseline_toBaselineOf="@id/text"
+        app:layout_constraintLeft_toRightOf="@id/text"
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <ListView
+        android:layout_marginTop="10dp"
+        android:id="@+id/mod_manage_listview"
+        app:layout_constraintTop_toBottomOf="@id/mod_manage_version_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

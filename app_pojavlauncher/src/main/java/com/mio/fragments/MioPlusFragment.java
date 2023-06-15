@@ -25,6 +25,7 @@ import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
+import net.kdt.pojavlaunch.fragments.ProfileEditorFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
@@ -63,7 +64,7 @@ public class MioPlusFragment extends Fragment {
         Button downloadFabricButton = view.findViewById(R.id.download_fabric_button);
         Button downloadOptfineButton = view.findViewById(R.id.download_optfine_button);
         Button customDirButton = view.findViewById(R.id.custom_dir_button);
-        Button modManagerButton = view.findViewById(R.id.mod_manager_button);
+        Button modManageButton = view.findViewById(R.id.mod_manage_button);
         Button modDownloadButton = view.findViewById(R.id.mod_download_button);
 
         String[] sourceItems = new String[]{"官方源", "BMCLAPI", "MCBBS"};
@@ -216,7 +217,12 @@ public class MioPlusFragment extends Fragment {
             dialog.show();
         });
 
-
+        modManageButton.setOnClickListener(v->{
+            Tools.swapFragment(requireActivity(), ModManageFragment.class, ModManageFragment.TAG, true, null);
+        });
+        modDownloadButton.setOnClickListener(v->{
+            Tools.swapFragment(requireActivity(), ModDownloadFragment.class, ModDownloadFragment.TAG, true, null);
+        });
     }
 
     private void download(String url, String dest,boolean install) {
