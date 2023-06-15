@@ -112,7 +112,7 @@ public class MioPlusFragment extends Fragment {
                                 AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
                                         .setTitle("请选择Forge版本")
                                         .setItems(forgeItems, (d, j) -> {
-                                            download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/forge-installer-" + forgeItems[j] + ".jar",true);
+                                            download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/forge-installer-" + forgeItems[j] + ".jar", true);
                                         })
                                         .setNegativeButton("取消", null)
                                         .create();
@@ -136,7 +136,7 @@ public class MioPlusFragment extends Fragment {
                     AlertDialog dialog = new AlertDialog.Builder(requireContext())
                             .setTitle("请选择fabric版本")
                             .setItems(items, (dialogInterface, i) -> {
-                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar",true);
+                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar", true);
                             })
                             .setNegativeButton("取消", null)
                             .create();
@@ -152,10 +152,10 @@ public class MioPlusFragment extends Fragment {
                     list.add(version.id);
                 }
             }
-            String[] versions=new File(Tools.DIR_HOME_VERSION).list();
-            AlertDialog dialog1=new AlertDialog.Builder(requireContext())
+            String[] versions = new File(Tools.DIR_HOME_VERSION).list();
+            AlertDialog dialog1 = new AlertDialog.Builder(requireContext())
                     .setTitle("请选择高清修复安装的位置")
-                    .setItems(versions,(dd,k)->{
+                    .setItems(versions, (dd, k) -> {
                         String[] items = list.toArray(new String[0]);
                         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                                 .setTitle("请选择版本")
@@ -171,7 +171,7 @@ public class MioPlusFragment extends Fragment {
                                             AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
                                                     .setTitle("请选择高清修复版本")
                                                     .setItems(optItems, (d, j) -> {
-                                                        download(optifineDownload.getDownloadLink(optItems[j]), Tools.DIR_HOME_VERSION+"/" +versions[k]+"/mods/" + "/optfine-" + optItems[j].replace("/", "-") + ".jar",false);
+                                                        download(optifineDownload.getDownloadLink(optItems[j]), Tools.DIR_HOME_VERSION + "/" + versions[k] + "/mods/" + "/optfine-" + optItems[j].replace("/", "-") + ".jar", false);
                                                     })
                                                     .setNegativeButton("取消", null)
                                                     .create();
@@ -182,50 +182,50 @@ public class MioPlusFragment extends Fragment {
                                 .setNegativeButton("取消", null)
                                 .create();
                         dialog.show();
-                    }).setNegativeButton("取消",null)
+                    }).setNegativeButton("取消", null)
                     .create();
             dialog1.show();
         });
 
-        customDirButton.setOnClickListener(v->{
-            Map<String, MinecraftProfile>  map = LauncherProfiles.mainProfileJson.profiles;
+        customDirButton.setOnClickListener(v -> {
+            Map<String, MinecraftProfile> map = LauncherProfiles.mainProfileJson.profiles;
             Set<String> keys = map.keySet();
-            List<String> list=new ArrayList<>();
-            for (String key:keys){
+            List<String> list = new ArrayList<>();
+            for (String key : keys) {
                 list.add(Objects.requireNonNull(map.get(key)).name);
             }
-            String[] items=list.toArray(new String[0]);
+            String[] items = list.toArray(new String[0]);
             AlertDialog dialog = new AlertDialog.Builder(requireContext())
                     .setTitle("请选择需要版本隔离的游戏")
-                    .setItems(items,(d,i)->{
-                        String mProfileKey=null;
+                    .setItems(items, (d, i) -> {
+                        String mProfileKey = null;
                         MinecraftProfile mTempProfile = null;
-                        for (String key:keys){
-                            if(map.get(key).name.equals(items[i])){
-                                mProfileKey=key;
-                                mTempProfile=map.get(key);
+                        for (String key : keys) {
+                            if (map.get(key).name.equals(items[i])) {
+                                mProfileKey = key;
+                                mTempProfile = map.get(key);
                             }
                         }
                         assert mTempProfile != null;
-                        mTempProfile.gameDir="./.minecraft/versions/"+mTempProfile.lastVersionId;
+                        mTempProfile.gameDir = "./.minecraft/versions/" + mTempProfile.lastVersionId;
                         LauncherProfiles.mainProfileJson.profiles.put(mProfileKey, mTempProfile);
                         LauncherProfiles.update();
                         ExtraCore.setValue(ExtraConstants.REFRESH_VERSION_SPINNER, mProfileKey);
                     })
-                    .setNegativeButton("取消",null)
+                    .setNegativeButton("取消", null)
                     .create();
             dialog.show();
         });
 
-        modManageButton.setOnClickListener(v->{
+        modManageButton.setOnClickListener(v -> {
             Tools.swapFragment(requireActivity(), ModManageFragment.class, ModManageFragment.TAG, true, null);
         });
-        modDownloadButton.setOnClickListener(v->{
+        modDownloadButton.setOnClickListener(v -> {
             Tools.swapFragment(requireActivity(), ModDownloadFragment.class, ModDownloadFragment.TAG, true, null);
         });
     }
 
-    private void download(String url, String dest,boolean install) {
+    private void download(String url, String dest, boolean install) {
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("下载进度：0%");
         progressDialog.show();
@@ -237,13 +237,13 @@ public class MioPlusFragment extends Fragment {
                     if (percent == 100) {
                         progressDialog.dismiss();
                         progressDialog = new ProgressDialog(requireContext());
-                        if (install){
+                        if (install) {
                             Intent intent = new Intent(requireActivity(), JavaGUILauncherActivity.class);
                             intent.putExtra("modFile", new File(dest));
                             requireActivity().startActivity(intent);
                         } else {
-                            requireActivity().runOnUiThread(()->{
-                                Toast.makeText(requireContext(),"下载完成" ,Toast.LENGTH_SHORT).show();
+                            requireActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), "下载完成", Toast.LENGTH_SHORT).show();
                             });
                         }
                     }

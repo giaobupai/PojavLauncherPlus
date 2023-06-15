@@ -45,28 +45,28 @@ public class ModManageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        versionSpinner=view.findViewById(R.id.mod_manage_version_spinner);
-        listView=view.findViewById(R.id.mod_manage_listview);
+        versionSpinner = view.findViewById(R.id.mod_manage_version_spinner);
+        listView = view.findViewById(R.id.mod_manage_listview);
 
-        List<String> list=new ArrayList<>();
+        List<String> list = new ArrayList<>();
         list.add("公用目录");
         list.addAll(Arrays.asList(Objects.requireNonNull(new File(Tools.DIR_HOME_VERSION).list())));
 
-        ArrayAdapter<String> versionSpinnerAdapter=new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,list);
+        ArrayAdapter<String> versionSpinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, list);
         versionSpinner.setAdapter(versionSpinnerAdapter);
         versionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 fileList.clear();
                 File[] files;
-                if (list.get(i).equals("公用目录")){
-                    files=new File(Tools.DIR_GAME_NEW + "/mods").listFiles();
+                if (list.get(i).equals("公用目录")) {
+                    files = new File(Tools.DIR_GAME_NEW + "/mods").listFiles();
                 } else {
-                    files=new File(Tools.DIR_HOME_VERSION + "/" + list.get(i) + "/mods").listFiles();
+                    files = new File(Tools.DIR_HOME_VERSION + "/" + list.get(i) + "/mods").listFiles();
                 }
-                if (Objects.isNull(files)){
-                    files=new File[0];
-                    Toast.makeText(requireContext(),"当前所选择版本无mod",Toast.LENGTH_SHORT).show();
+                if (Objects.isNull(files)) {
+                    files = new File[0];
+                    Toast.makeText(requireContext(), "当前所选择版本无mod", Toast.LENGTH_SHORT).show();
                 }
                 fileList.addAll(Arrays.asList(files));
 
@@ -79,14 +79,14 @@ public class ModManageFragment extends Fragment {
             }
         });
 
-        fileList=new ArrayList<>();
-        File[] files=new File(Tools.DIR_HOME_VERSION).listFiles();
-        if (Objects.isNull(files)){
-            files=new File[0];
-            Toast.makeText(requireContext(),"当前所选择版本无mod",Toast.LENGTH_SHORT).show();
+        fileList = new ArrayList<>();
+        File[] files = new File(Tools.DIR_HOME_VERSION).listFiles();
+        if (Objects.isNull(files)) {
+            files = new File[0];
+            Toast.makeText(requireContext(), "当前所选择版本无mod", Toast.LENGTH_SHORT).show();
         }
         fileList.addAll(Arrays.asList(files));
-        modManageAdapter=new ModManageAdapter(requireContext(),fileList);
+        modManageAdapter = new ModManageAdapter(requireContext(), fileList);
         listView.setAdapter(modManageAdapter);
     }
 
