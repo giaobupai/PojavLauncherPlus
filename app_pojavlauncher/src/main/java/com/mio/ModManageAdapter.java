@@ -1,13 +1,17 @@
 package com.mio;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
 
 import net.kdt.pojavlaunch.R;
 
@@ -52,6 +56,7 @@ public class ModManageAdapter extends BaseAdapter {
             holder.modName = convertView.findViewById(R.id.item_mod_name);
             holder.infoText = convertView.findViewById(R.id.item_mod_info);
             holder.checkBox = convertView.findViewById(R.id.checkbox);
+            holder.modDelete = convertView.findViewById(R.id.mod_delete_button);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -69,7 +74,22 @@ public class ModManageAdapter extends BaseAdapter {
                 file.renameTo(new File(file.getAbsolutePath()+".disable"));
             }
         });
-
+        holder.modDelete.setOnClickListener(v->{
+            AlertDialog dialog=new AlertDialog.Builder(context)
+                    .setTitle("警告")
+                    .setMessage("您是否要删除该mod?")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            fileList.get(position).delete();
+                            fileList.remove(position);
+                            notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton("取消",null)
+                    .create();
+            dialog.show();
+        });
         return convertView;
     }
 
@@ -96,5 +116,6 @@ public class ModManageAdapter extends BaseAdapter {
         TextView modName;
         TextView infoText;
         CheckBox checkBox;
+        Button modDelete;
     }
 }
