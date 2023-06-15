@@ -42,7 +42,7 @@ public class ModManageFragment extends Fragment {
     private ListView listView;
     private static ModManageAdapter modManageAdapter;
     private static List<File> fileList;
-    public static String path="";
+    public static String path = "";
 
     public ModManageFragment() {
         super(R.layout.fragment_mio_plus_mod_manage);
@@ -58,7 +58,7 @@ public class ModManageFragment extends Fragment {
 
         List<String> list = new ArrayList<>();
         list.add("公用目录");
-        String[] ff=new File(Tools.DIR_HOME_VERSION).list();
+        String[] ff = new File(Tools.DIR_HOME_VERSION).list();
         if (!Objects.isNull(ff)) {
             list.addAll(Arrays.asList(ff));
         }
@@ -70,10 +70,10 @@ public class ModManageFragment extends Fragment {
                 fileList.clear();
                 File[] files;
                 if (list.get(i).equals("公用目录")) {
-                    path=Tools.DIR_GAME_NEW + "/mods";
+                    path = Tools.DIR_GAME_NEW + "/mods";
                     files = new File(Tools.DIR_GAME_NEW + "/mods").listFiles();
                 } else {
-                    path=Tools.DIR_HOME_VERSION + "/" + list.get(i) + "/mods";
+                    path = Tools.DIR_HOME_VERSION + "/" + list.get(i) + "/mods";
                     files = new File(Tools.DIR_HOME_VERSION + "/" + list.get(i) + "/mods").listFiles();
                 }
                 if (Objects.isNull(files)) {
@@ -100,20 +100,27 @@ public class ModManageFragment extends Fragment {
         modManageAdapter = new ModManageAdapter(requireContext(), fileList);
         listView.setAdapter(modManageAdapter);
 
-        ImageView addMod=view.findViewById(R.id.add_mod);
-        addMod.setOnClickListener(v->{
+        ImageView addMod = view.findViewById(R.id.add_mod);
+        addMod.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("jar");
-            if(mimeType == null) mimeType = "*/*";
+            if (mimeType == null) mimeType = "*/*";
             intent.setType(mimeType);
             requireActivity().startActivityForResult(intent, 114514);
         });
     }
 
-    public static void addModToList(File modFile){
+    public static void addModToList(File modFile) {
         fileList.add(modFile);
         modManageAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        modManageAdapter=null;
+        fileList.clear();
+        fileList=null;
+    }
 }
