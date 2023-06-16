@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -25,7 +24,6 @@ import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
-import net.kdt.pojavlaunch.fragments.ProfileEditorFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
@@ -221,7 +219,7 @@ public class MioPlusFragment extends Fragment {
             Tools.swapFragment(requireActivity(), ModManageFragment.class, ModManageFragment.TAG, true, null);
         });
         modDownloadButton.setOnClickListener(v -> {
-            Tools.swapFragment(requireActivity(), ModDownloadFragment.class, ModDownloadFragment.TAG, true, null);
+            Tools.swapFragment(requireActivity(), ModSearchFragment.class, ModSearchFragment.TAG, true, null);
         });
     }
 

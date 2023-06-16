@@ -158,6 +158,8 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
             version = version == null ? minecraftProfile.lastVersionId : version;
 
             JMinecraftVersionList.Version mVersionInfo = Tools.getVersionInfo(version);
+            Tools.write(Tools.DIR_GAME_NEW+"/合并.json",Tools.GLOBAL_GSON.toJson(mVersionInfo,JMinecraftVersionList.Version.class));
+
             isInputStackCall = mVersionInfo.arguments != null;
             CallbackBridge.nativeSetUseInputStackQueue(isInputStackCall);
 

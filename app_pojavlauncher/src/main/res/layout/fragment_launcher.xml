@@ -62,7 +62,6 @@
 		android:background="?android:attr/selectableItemBackground"
 		android:drawableStart="@drawable/mio"
 		android:text="澪增强版功能"
-
 		app:layout_constraintTop_toBottomOf="@id/share_logs_button"
 		/>
 
