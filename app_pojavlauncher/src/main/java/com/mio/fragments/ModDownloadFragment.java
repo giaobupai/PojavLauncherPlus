@@ -114,7 +114,7 @@ public class ModDownloadFragment extends Fragment {
             modList.add(map.get(key));
         }
 
-        ModVersionAdapter modVersionAdapter=new ModVersionAdapter(requireContext(),versionList,modList);
+        ModVersionAdapter modVersionAdapter=new ModVersionAdapter(requireActivity(),versionList,modList,data.getId());
         modVersionExpandableListView.setAdapter(modVersionAdapter);
 
     }

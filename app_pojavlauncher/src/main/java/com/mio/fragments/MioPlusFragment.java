@@ -20,6 +20,7 @@ import com.mio.OptifineDownload;
 
 import net.kdt.pojavlaunch.JMinecraftVersionList;
 import net.kdt.pojavlaunch.JavaGUILauncherActivity;
+import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
@@ -226,8 +227,10 @@ public class MioPlusFragment extends Fragment {
     private void download(String url, String dest, boolean install) {
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("下载进度：0%");
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
-        new Thread(() -> {
+        PojavApplication.sExecutorService.execute(()->{
             try {
                 DownloadUtils.downloadFileMonitored(url, dest, new byte[1024], (curr, max) -> requireActivity().runOnUiThread(() -> {
                     int percent = curr * 100 / max;
@@ -249,7 +252,7 @@ public class MioPlusFragment extends Fragment {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
+        });
     }
 
     public static boolean isHigher(String version1, String version2) {

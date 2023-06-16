@@ -1,5 +1,7 @@
 package com.mio.mod.curseforge;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 
 import org.json.JSONObject;
@@ -49,6 +51,18 @@ public class CurseforgeAPI {
         ///v1/mods/featured
     }
 
+    public String getDownloadUrl(int modid,int fileid){
+//        /v1/mods/{modId}/files/{fileId}/download-url
+        try {
+            String json = httpGet(PREFIX + "/v1/mods/"+modid+"/files/"+fileid+"/download-url");
+            JSONObject jsonObject = new JSONObject(json);
+            return jsonObject.getString("data");
+        } catch (Exception e) {
+            Log.e("测试",e.toString());
+        }
+        return null;
+    }
+
     private String httpGet(String url) {
         try {
             URL obj = new URL(url);
@@ -69,7 +83,7 @@ public class CurseforgeAPI {
             con.disconnect();
             return response.toString();
         } catch (Exception e) {
-
+            Log.e("测试",e.toString());
         }
         return null;
     }

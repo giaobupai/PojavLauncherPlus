@@ -1,27 +1,45 @@
 package com.mio.adapter;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.mio.mod.curseforge.CurseAddon;
+import com.mio.mod.curseforge.CurseforgeAPI;
 
+import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
+import net.kdt.pojavlaunch.Tools;
+import net.kdt.pojavlaunch.utils.DownloadUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ModVersionAdapter extends BaseExpandableListAdapter {
-    private Context context;
+    private FragmentActivity context;
     private List<String> versionList;
     private List<List<CurseAddon.Data.LatestFilesIndexes>> modList;
+    private int modID;
 
-    public ModVersionAdapter(Context context,List<String> versionList,List<List<CurseAddon.Data.LatestFilesIndexes>> modList){
+    public ModVersionAdapter(FragmentActivity context, List<String> versionList, List<List<CurseAddon.Data.LatestFilesIndexes>> modList, int modID){
         this.context=context;
         this.versionList=versionList;
         this.modList=modList;
+        this.modID=modID;
     }
     @Override
     public int getGroupCount() {
@@ -71,6 +89,48 @@ public class ModVersionAdapter extends BaseExpandableListAdapter {
         convertView= LayoutInflater.from(context).inflate(R.layout.item_mio_plus_mod_download_version_mod,parent,false);
         TextView textView = convertView.findViewById(R.id.item_mod_download_version_mod_text);
         textView.setText(modList.get(groupPosition).get(childPosition).getFilename());
+        ImageButton imageButton=convertView.findViewById(R.id.install);
+        imageButton.setOnClickListener(v->{
+            List<String> list = new ArrayList<>();
+            list.add("公用目录");
+            String[] ff = new File(Tools.DIR_HOME_VERSION).list();
+            if (!Objects.isNull(ff)) {
+                list.addAll(Arrays.asList(ff));
+            }
+            String[] items=list.toArray(new String[0]);
+            AlertDialog dialog=new AlertDialog.Builder(context)
+                    .setTitle("请选择mod下载位置")
+                    .setItems(items,(d,i)->{
+                        ProgressDialog progressDialog = new ProgressDialog(context);
+                        progressDialog.setTitle("下载进度：0%");
+                        progressDialog.setCancelable(false);
+                        progressDialog.setCanceledOnTouchOutside(false);
+                        progressDialog.show();
+                        PojavApplication.sExecutorService.execute(()->{
+                            String url=new CurseforgeAPI().getDownloadUrl(modID,modList.get(groupPosition).get(childPosition).getFileId());
+                            Log.e("测试",url+"");
+                            String path=Tools.DIR_GAME_NEW+(items[i].equals("公用目录")?"/mods/":("/versions/"+items[i]+"/mods/"))+modList.get(groupPosition).get(childPosition).getFilename();
+                            try {
+                                DownloadUtils.downloadFileMonitored(url, path, new byte[1024], (curr, max) -> {
+                                    ((FragmentActivity)context).runOnUiThread(() -> {
+                                        int percent = curr * 100 / max;
+                                        progressDialog.setTitle("下载进度：" + percent + "%");
+                                        if (percent == 100) {
+                                            progressDialog.dismiss();
+                                            Toast.makeText(context, "下载完成", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                });
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    })
+                    .setNegativeButton("取消",null)
+                    .create();
+            dialog.show();
+
+        });
         return convertView;
     }
 
