@@ -233,7 +233,7 @@ public class MioPlusFragment extends Fragment {
         PojavApplication.sExecutorService.execute(()->{
             try {
                 DownloadUtils.downloadFileMonitored(url, dest, new byte[1024], (curr, max) -> requireActivity().runOnUiThread(() -> {
-                    int percent = curr * 100 / max;
+                    long percent = curr * 100 / max;
                     progressDialog.setTitle("下载进度：" + percent + "%");
                     if (percent == 100) {
                         progressDialog.dismiss();

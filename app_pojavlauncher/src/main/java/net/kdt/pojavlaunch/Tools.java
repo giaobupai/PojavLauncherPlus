@@ -755,7 +755,7 @@ public final class Tools {
         DownloadUtils.downloadFile(urlInput, file);
     }
     public interface DownloaderFeedback {
-        void updateProgress(int curr, int max);
+        void updateProgress(long curr, long max);
     }
 
 

@@ -119,8 +119,8 @@ public class DownloadUtils {
         InputStream readStr = conn.getInputStream();
         FileOutputStream fos = new FileOutputStream(outputFile);
         int cur;
-        int oval = 0;
-        int len = conn.getContentLength();
+        long oval = 0;
+        long len = conn.getContentLength();
 
         if(buffer == null) buffer = new byte[65535];
 

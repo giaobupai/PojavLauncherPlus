@@ -113,7 +113,7 @@ public class ModVersionAdapter extends BaseExpandableListAdapter {
                             try {
                                 DownloadUtils.downloadFileMonitored(url, path, new byte[1024], (curr, max) -> {
                                     ((FragmentActivity)context).runOnUiThread(() -> {
-                                        int percent = curr * 100 / max;
+                                        long percent = curr * 100 / max;
                                         progressDialog.setTitle("下载进度：" + percent + "%");
                                         if (percent == 100) {
                                             progressDialog.dismiss();
