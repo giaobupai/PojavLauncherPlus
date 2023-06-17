@@ -153,20 +153,20 @@ public final class Tools {
 
     public static void launchMinecraft(final Activity activity, MinecraftAccount minecraftAccount,
                                        MinecraftProfile minecraftProfile, String versionId, int versionJavaRequirement) throws Throwable {
-        int freeDeviceMemory = getFreeDeviceMemory(activity);
-        if(LauncherPreferences.PREF_RAM_ALLOCATION > freeDeviceMemory) {
-            Object memoryErrorLock = new Object();
-            activity.runOnUiThread(() -> {
-                androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(activity)
-                        .setMessage(activity.getString(R.string.memory_warning_msg, freeDeviceMemory ,LauncherPreferences.PREF_RAM_ALLOCATION))
-                        .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {synchronized(memoryErrorLock){memoryErrorLock.notifyAll();}})
-                        .setOnCancelListener((i) -> {synchronized(memoryErrorLock){memoryErrorLock.notifyAll();}});
-                b.show();
-            });
-            synchronized (memoryErrorLock) {
-                memoryErrorLock.wait();
-            }
-        }
+//        int freeDeviceMemory = getFreeDeviceMemory(activity);
+//        if(LauncherPreferences.PREF_RAM_ALLOCATION > freeDeviceMemory) {
+//            Object memoryErrorLock = new Object();
+//            activity.runOnUiThread(() -> {
+//                androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(activity)
+//                        .setMessage(activity.getString(R.string.memory_warning_msg, freeDeviceMemory ,LauncherPreferences.PREF_RAM_ALLOCATION))
+//                        .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {synchronized(memoryErrorLock){memoryErrorLock.notifyAll();}})
+//                        .setOnCancelListener((i) -> {synchronized(memoryErrorLock){memoryErrorLock.notifyAll();}});
+//                b.show();
+//            });
+//            synchronized (memoryErrorLock) {
+//                memoryErrorLock.wait();
+//            }
+//        }
         Runtime runtime = MultiRTUtils.forceReread(Tools.pickRuntime(minecraftProfile, versionJavaRequirement));
         JMinecraftVersionList.Version versionInfo = Tools.getVersionInfo(versionId);
         LauncherProfiles.update();
