@@ -109,7 +109,10 @@ public class ModVersionAdapter extends BaseExpandableListAdapter {
                         progressDialog.show();
                         PojavApplication.sExecutorService.execute(() -> {
                             String url = modList.get(groupPosition).get(childPosition).getDownloadUrl();
-                            Log.e("测试", url + "");
+                            if (Objects.isNull(url)){
+                                String modid=String.valueOf(modList.get(groupPosition).get(childPosition).getId());
+                                url="https://media.forgecdn.net/files/"+modid.substring(0,4)+"/"+modid.substring(4)+"/"+modList.get(groupPosition).get(childPosition).getFileName();
+                            }
                             String path = Tools.DIR_GAME_NEW + (items[i].equals("公用目录") ? "/mods/" : ("/versions/" + items[i] + "/mods/")) + modList.get(groupPosition).get(childPosition).getFileName();
                             try {
                                 DownloadUtils.downloadFileMonitored(url, path, new byte[1024], (curr, max) -> {

@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 public class CurseforgeAPI {
     private static final String PREFIX = "https://api.curseforge.com";
@@ -69,11 +70,20 @@ public class CurseforgeAPI {
 
     public String getDownloadUrl(int modid,int fileid){
         try {
-            String json = httpGet(PREFIX + "/v1/mods/"+modid+"/files/"+fileid+"/download-url");
+            String json = httpGet(PREFIX + "/v1/mods/"+modid+"/files/"+fileid);
+            if (json==null){
+                return null;
+            }
             JSONObject jsonObject = new JSONObject(json);
-            return jsonObject.getString("data");
+            CurseModFiles.Data data = new Gson().fromJson(jsonObject.getJSONObject("data").toString(), CurseModFiles.Data.class);
+            String url = data.getDownloadUrl();
+            if (Objects.isNull(url)){
+                String id=String.valueOf(data.getId());
+                url="https://media.forgecdn.net/files/"+id.substring(0,4)+"/"+id.substring(4)+"/"+data.getFileName();
+            }
+            return url;
         } catch (Exception e) {
-            Log.e("测试",e.toString());
+            Log.e("测试","getDownloadUrl:"+e.toString());
         }
         return null;
     }
