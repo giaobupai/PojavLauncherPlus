@@ -19,6 +19,7 @@ import com.mio.adapter.ModSearchAdapter;
 import com.mio.adapter.ModVersionAdapter;
 import com.mio.mod.NameTranslator;
 import com.mio.mod.curseforge.CurseAddon;
+import com.mio.mod.curseforge.CurseModFiles;
 import com.mio.mod.curseforge.CurseforgeAPI;
 
 import net.kdt.pojavlaunch.PojavApplication;
@@ -41,7 +42,7 @@ public class ModDownloadFragment extends Fragment {
     private List<Integer> depModID;
     private CurseforgeAPI api=new CurseforgeAPI();
     private List<String> versionList;
-    private List<List<CurseAddon.Data.LatestFilesIndexes>> modList;
+    private List<List<CurseModFiles.Data>> modList;
 
     public ModDownloadFragment() {
         super(R.layout.fragment_mio_plus_mod_download);
@@ -89,35 +90,47 @@ public class ModDownloadFragment extends Fragment {
         }
 
 
-
-        List<CurseAddon.Data.LatestFilesIndexes> latestFilesIndexes = data.getLatestFilesIndexes();
-        Map<String,List<CurseAddon.Data.LatestFilesIndexes>> map=new HashMap<>();
-        for (CurseAddon.Data.LatestFilesIndexes indexes:latestFilesIndexes){
-            List<CurseAddon.Data.LatestFilesIndexes> temp;
-            if (map.containsKey(indexes.getGameVersion())){
-                temp=map.get(indexes.getGameVersion());
+        PojavApplication.sExecutorService.execute(()->{
+            List<CurseModFiles.Data> dataList = api.getModFiles(data.getId());
+            Map<String,List<CurseModFiles.Data>> map=new HashMap<>();
+            if (!Objects.isNull(dataList)){
+                for (CurseModFiles.Data d:dataList){
+                   for (String version:d.getGameVersions()){
+                       if (version.contains(".")){
+                           List<CurseModFiles.Data> temp=new ArrayList<>();
+                           if (map.containsKey(version)){
+                               temp=map.get(version);
+                           } else {
+                               temp=new ArrayList<>();
+                           }
+                           temp.add(d);
+                           map.put(version,temp);
+                       }
+                   }
+                }
+                versionList=new ArrayList<>();
+                versionList.addAll(map.keySet());
+                Collections.sort(versionList,(o1, o2) -> {
+                    if (!isHigher(o1, o2)) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                });
+                modList=new ArrayList<>();
+                for (String key:versionList){
+                    modList.add(map.get(key));
+                }
+                requireActivity().runOnUiThread(()->{
+                    ModVersionAdapter modVersionAdapter=new ModVersionAdapter(requireActivity(),versionList,modList,data.getId());
+                    modVersionExpandableListView.setAdapter(modVersionAdapter);
+                });
             } else {
-                temp=new ArrayList<>();
-            }
-            temp.add(indexes);
-            map.put(indexes.getGameVersion(),temp);
-        }
-        versionList=new ArrayList<>();
-        versionList.addAll(map.keySet());
-        Collections.sort(versionList,(o1, o2) -> {
-            if (!isHigher(o1, o2)) {
-                return 1;
-            } else {
-                return -1;
+                requireActivity().runOnUiThread(()-> {
+                    Toast.makeText(requireContext(), "获取mod列表失败！", Toast.LENGTH_SHORT).show();
+                });
             }
         });
-        modList=new ArrayList<>();
-        for (String key:versionList){
-            modList.add(map.get(key));
-        }
-
-        ModVersionAdapter modVersionAdapter=new ModVersionAdapter(requireActivity(),versionList,modList,data.getId());
-        modVersionExpandableListView.setAdapter(modVersionAdapter);
 
     }
 }

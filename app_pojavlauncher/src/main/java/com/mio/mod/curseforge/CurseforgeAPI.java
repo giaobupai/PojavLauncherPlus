@@ -4,9 +4,12 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import net.kdt.pojavlaunch.Tools;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -35,7 +38,6 @@ public class CurseforgeAPI {
     }
 
     public CurseAddon.Data getModByID(int id) {
-        /// v1/mods/{modId}
         try {
             String json = httpGet(PREFIX + "/v1/mods/" + id);
             JSONObject jsonObject = new JSONObject(json);
@@ -47,12 +49,25 @@ public class CurseforgeAPI {
         return null;
     }
 
+    public List<CurseModFiles.Data> getModFiles(int id){
+        String json = httpGet(PREFIX + "/v1/mods/" + id +"/files");
+        if (json == null) {
+            return null;
+        }
+        try {
+            Tools.write(Tools.DIR_GAME_NEW+"/a.json",json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        CurseModFiles addon = new Gson().fromJson(json, CurseModFiles.class);
+        List<CurseModFiles.Data> dataList = addon.getData();
+        return dataList;
+    }
+
     public void getFeaturedMods() {
-        ///v1/mods/featured
     }
 
     public String getDownloadUrl(int modid,int fileid){
-//        /v1/mods/{modId}/files/{fileId}/download-url
         try {
             String json = httpGet(PREFIX + "/v1/mods/"+modid+"/files/"+fileid+"/download-url");
             JSONObject jsonObject = new JSONObject(json);

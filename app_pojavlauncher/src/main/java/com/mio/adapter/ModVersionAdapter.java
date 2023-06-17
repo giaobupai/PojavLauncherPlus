@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 
 import com.mio.mod.curseforge.CurseAddon;
+import com.mio.mod.curseforge.CurseModFiles;
 import com.mio.mod.curseforge.CurseforgeAPI;
 
 import net.kdt.pojavlaunch.PojavApplication;
@@ -31,10 +32,10 @@ import java.util.Objects;
 public class ModVersionAdapter extends BaseExpandableListAdapter {
     private FragmentActivity context;
     private List<String> versionList;
-    private List<List<CurseAddon.Data.LatestFilesIndexes>> modList;
+    private List<List<CurseModFiles.Data>> modList;
     private int modID;
 
-    public ModVersionAdapter(FragmentActivity context, List<String> versionList, List<List<CurseAddon.Data.LatestFilesIndexes>> modList, int modID){
+    public ModVersionAdapter(FragmentActivity context, List<String> versionList, List<List<CurseModFiles.Data>> modList, int modID){
         this.context=context;
         this.versionList=versionList;
         this.modList=modList;
@@ -87,7 +88,7 @@ public class ModVersionAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         convertView= LayoutInflater.from(context).inflate(R.layout.item_mio_plus_mod_download_version_mod,parent,false);
         TextView textView = convertView.findViewById(R.id.item_mod_download_version_mod_text);
-        textView.setText(modList.get(groupPosition).get(childPosition).getFilename());
+        textView.setText(modList.get(groupPosition).get(childPosition).getFileName());
         ImageButton imageButton=convertView.findViewById(R.id.install);
         imageButton.setOnClickListener(v->{
             List<String> list = new ArrayList<>();
@@ -106,9 +107,9 @@ public class ModVersionAdapter extends BaseExpandableListAdapter {
                         progressDialog.setCanceledOnTouchOutside(false);
                         progressDialog.show();
                         PojavApplication.sExecutorService.execute(()->{
-                            String url=new CurseforgeAPI().getDownloadUrl(modID,modList.get(groupPosition).get(childPosition).getFileId());
+                            String url=modList.get(groupPosition).get(childPosition).getDownloadUrl();
                             Log.e("测试",url+"");
-                            String path=Tools.DIR_GAME_NEW+(items[i].equals("公用目录")?"/mods/":("/versions/"+items[i]+"/mods/"))+modList.get(groupPosition).get(childPosition).getFilename();
+                            String path=Tools.DIR_GAME_NEW+(items[i].equals("公用目录")?"/mods/":("/versions/"+items[i]+"/mods/"))+modList.get(groupPosition).get(childPosition).getFileName();
                             try {
                                 DownloadUtils.downloadFileMonitored(url, path, new byte[1024], (curr, max) -> {
                                     ((FragmentActivity)context).runOnUiThread(() -> {
