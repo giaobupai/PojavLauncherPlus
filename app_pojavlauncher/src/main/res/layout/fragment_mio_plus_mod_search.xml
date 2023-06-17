@@ -32,6 +32,7 @@
         android:layout_height="@dimen/_40sdp"/>
 
     <ListView
+        android:scrollbars="none"
         android:layout_margin="@dimen/_10sdp"
         android:id="@+id/mod_search_listview"
         app:layout_constraintTop_toBottomOf="@id/mod_search_edittext"

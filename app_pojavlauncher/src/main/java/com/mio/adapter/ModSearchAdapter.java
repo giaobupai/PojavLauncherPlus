@@ -69,6 +69,9 @@ public class ModSearchAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         CurseAddon.Data data = dataList.get(position);
+        if (Objects.isNull(data)){
+            return convertView;
+        }
         try {
             Glide.with(context).load(data.getLogo().getUrl()).into(holder.logo);
         }catch (Exception e){

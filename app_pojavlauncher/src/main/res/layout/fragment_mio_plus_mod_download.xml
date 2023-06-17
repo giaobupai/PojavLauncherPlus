@@ -33,6 +33,7 @@
     </LinearLayout>
 
     <ExpandableListView
+        android:scrollbars="none"
         android:id="@+id/mod_version"
         app:layout_constraintTop_toBottomOf="@id/mod_dependence_linearlayout"
         android:groupIndicator="@null"

@@ -22,7 +22,7 @@
         android:layout_height="30dp"
         android:id="@+id/item_mod_search_name_text"
         android:text="ModName"
-        android:textColor="#24BBFF"
+        android:textColor="#FFFFFF"
         android:textSize="13sp"
         android:ellipsize="marquee"
         android:gravity="left|center"/>
@@ -31,12 +31,13 @@
         android:layout_marginStart="@dimen/_10sdp"
         app:layout_constraintTop_toBottomOf="@id/item_mod_search_name_text"
         app:layout_constraintLeft_toRightOf="@id/logo"
-        android:layout_width="wrap_content"
+        app:layout_constraintRight_toLeftOf="@id/mod_search_download_imageview"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:text="info"
         android:id="@+id/item_mod_search_info_text"
-        android:textColor="#FFFF9595"
+        android:ellipsize="marquee"
+        android:textColor="@color/minebutton_color"
         android:textSize="10sp"/>
 
     <ImageView
