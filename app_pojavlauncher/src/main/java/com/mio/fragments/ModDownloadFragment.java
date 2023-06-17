@@ -40,7 +40,7 @@ public class ModDownloadFragment extends Fragment {
     private ListView modDependenceListView;
     public static CurseAddon.Data data;
     private List<Integer> depModID;
-    private CurseforgeAPI api=new CurseforgeAPI();
+    private CurseforgeAPI api = new CurseforgeAPI();
     private List<String> versionList;
     private List<List<CurseModFiles.Data>> modList;
 
@@ -56,77 +56,76 @@ public class ModDownloadFragment extends Fragment {
         progressDialog.setCancelable(false);
         progressDialog.setCanceledOnTouchOutside(false);
 
-        modDependenceLinearLayout=view.findViewById(R.id.mod_dependence_linearlayout);
-        modDependenceListView=view.findViewById(R.id.mod_dependence);
-        modVersionExpandableListView=view.findViewById(R.id.mod_version);
+        modDependenceLinearLayout = view.findViewById(R.id.mod_dependence_linearlayout);
+        modDependenceListView = view.findViewById(R.id.mod_dependence);
+        modVersionExpandableListView = view.findViewById(R.id.mod_version);
 
-        depModID=new ArrayList<>();
-        for(CurseAddon.Data.LatestFiles files:data.getLatestFiles()){
-            for(CurseAddon.Data.LatestFiles.Dependencies dep:files.getDependencies()){
-                if (!depModID.contains(dep.getModId())){
+        depModID = new ArrayList<>();
+        for (CurseAddon.Data.LatestFiles files : data.getLatestFiles()) {
+            for (CurseAddon.Data.LatestFiles.Dependencies dep : files.getDependencies()) {
+                if (!depModID.contains(dep.getModId())) {
                     depModID.add(dep.getModId());
                 }
             }
         }
-        if (depModID.size()!=0){
+        if (depModID.size() != 0) {
             progressDialog.show();
             modDependenceLinearLayout.setVisibility(View.VISIBLE);
-            PojavApplication.sExecutorService.execute(()->{
-                List<CurseAddon.Data> dataList=new ArrayList<>();
-                for (int id:depModID){
-                   CurseAddon.Data depData = api.getModByID(id);
-                   dataList.add(depData);
+            PojavApplication.sExecutorService.execute(() -> {
+                List<CurseAddon.Data> dataList = new ArrayList<>();
+                for (int id : depModID) {
+                    CurseAddon.Data depData = api.getModByID(id);
+                    dataList.add(depData);
                 }
-                requireActivity().runOnUiThread(()->{
+                requireActivity().runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    if (!Objects.isNull(dataList)){
-                        ModSearchAdapter modSearchAdapter=new ModSearchAdapter(requireActivity(),dataList,new NameTranslator(requireContext()));
+                    if (!Objects.isNull(dataList)) {
+                        ModSearchAdapter modSearchAdapter = new ModSearchAdapter(requireActivity(), dataList, new NameTranslator(requireContext()));
                         modDependenceListView.setAdapter(modSearchAdapter);
                     } else {
-                        Toast.makeText(requireContext(),"获取mod列表失败！",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "获取mod列表失败！", Toast.LENGTH_SHORT).show();
                     }
                 });
             });
         }
 
-
-        PojavApplication.sExecutorService.execute(()->{
+        PojavApplication.sExecutorService.execute(() -> {
             List<CurseModFiles.Data> dataList = api.getModFiles(data.getId());
-            Map<String,List<CurseModFiles.Data>> map=new HashMap<>();
-            if (!Objects.isNull(dataList)){
-                for (CurseModFiles.Data d:dataList){
-                   for (String version:d.getGameVersions()){
-                       if (version.contains(".")){
-                           List<CurseModFiles.Data> temp=new ArrayList<>();
-                           if (map.containsKey(version)){
-                               temp=map.get(version);
-                           } else {
-                               temp=new ArrayList<>();
-                           }
-                           temp.add(d);
-                           map.put(version,temp);
-                       }
-                   }
+            Map<String, List<CurseModFiles.Data>> map = new HashMap<>();
+            if (!Objects.isNull(dataList)) {
+                for (CurseModFiles.Data d : dataList) {
+                    for (String version : d.getGameVersions()) {
+                        if (version.contains(".")) {
+                            List<CurseModFiles.Data> temp = new ArrayList<>();
+                            if (map.containsKey(version)) {
+                                temp = map.get(version);
+                            } else {
+                                temp = new ArrayList<>();
+                            }
+                            temp.add(d);
+                            map.put(version, temp);
+                        }
+                    }
                 }
-                versionList=new ArrayList<>();
+                versionList = new ArrayList<>();
                 versionList.addAll(map.keySet());
-                Collections.sort(versionList,(o1, o2) -> {
+                Collections.sort(versionList, (o1, o2) -> {
                     if (!isHigher(o1, o2)) {
                         return 1;
                     } else {
                         return -1;
                     }
                 });
-                modList=new ArrayList<>();
-                for (String key:versionList){
+                modList = new ArrayList<>();
+                for (String key : versionList) {
                     modList.add(map.get(key));
                 }
-                requireActivity().runOnUiThread(()->{
-                    ModVersionAdapter modVersionAdapter=new ModVersionAdapter(requireActivity(),versionList,modList,data.getId());
+                requireActivity().runOnUiThread(() -> {
+                    ModVersionAdapter modVersionAdapter = new ModVersionAdapter(requireActivity(), versionList, modList, data.getId());
                     modVersionExpandableListView.setAdapter(modVersionAdapter);
                 });
             } else {
-                requireActivity().runOnUiThread(()-> {
+                requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "获取mod列表失败！", Toast.LENGTH_SHORT).show();
                 });
             }
