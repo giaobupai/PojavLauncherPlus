@@ -4,7 +4,6 @@ import static com.mio.fragments.MioPlusFragment.isHigher;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
@@ -40,7 +39,7 @@ public class ModDownloadFragment extends Fragment {
     private ListView modDependenceListView;
     public static CurseAddon.Data data;
     private List<Integer> depModID;
-    private CurseforgeAPI api = new CurseforgeAPI();
+    private final CurseforgeAPI api = new CurseforgeAPI();
     private List<String> versionList;
     private List<List<CurseModFiles.Data>> modList;
 

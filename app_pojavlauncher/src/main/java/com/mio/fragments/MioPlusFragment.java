@@ -14,9 +14,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import com.mio.FabricDownload;
-import com.mio.ForgeDownload;
-import com.mio.OptifineDownload;
+import com.mio.download.FabricDownload;
+import com.mio.download.ForgeDownload;
+import com.mio.download.OptifineDownload;
 
 import net.kdt.pojavlaunch.JMinecraftVersionList;
 import net.kdt.pojavlaunch.JavaGUILauncherActivity;
@@ -258,6 +258,12 @@ public class MioPlusFragment extends Fragment {
     public static boolean isHigher(String version1, String version2) {
         if (version1.equals(version2)) {
             return false;
+        }
+        if(version1.contains("-")){
+            version1=version1.substring(0,version1.indexOf("-"));
+        }
+        if (version2.contains("-")){
+            version2=version2.substring(0,version2.indexOf("-"));
         }
         String[] version1Array = version1.split("\\.");
         String[] version2Array = version2.split("\\.");

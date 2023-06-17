@@ -1,7 +1,9 @@
-package com.mio;
+package com.mio.download;
 
 import android.util.Log;
 
+
+import com.mio.SSLSocketClient;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
