@@ -88,6 +88,8 @@ public class ModDownloadFragment extends Fragment {
             });
         }
 
+
+
         List<CurseAddon.Data.LatestFilesIndexes> latestFilesIndexes = data.getLatestFilesIndexes();
         Map<String,List<CurseAddon.Data.LatestFilesIndexes>> map=new HashMap<>();
         for (CurseAddon.Data.LatestFilesIndexes indexes:latestFilesIndexes){

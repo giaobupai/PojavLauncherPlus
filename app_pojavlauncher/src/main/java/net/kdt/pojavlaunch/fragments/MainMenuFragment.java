@@ -2,7 +2,10 @@ package net.kdt.pojavlaunch.fragments;
 
 import static net.kdt.pojavlaunch.Tools.shareLog;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
@@ -23,6 +26,7 @@ import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
+import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 
 public class MainMenuFragment extends Fragment {
@@ -39,6 +43,7 @@ public class MainMenuFragment extends Fragment {
         Button mInstallJarButton = view.findViewById(R.id.install_jar_button);
         Button mShareLogsButton = view.findViewById(R.id.share_logs_button);
         Button mMioPlusButton = view.findViewById(R.id.mio_plus_button);
+        Button mMioPlusUpdate = view.findViewById(R.id.mio_plus_update_button);
 
         ImageButton mEditProfileButton = view.findViewById(R.id.edit_profile_button);
         Button mPlayButton = view.findViewById(R.id.play_button);
@@ -62,6 +67,31 @@ public class MainMenuFragment extends Fragment {
 
         }
 
+        mMioPlusUpdate.setOnClickListener(v->{
+            Intent intent = new Intent();
+            intent.setAction("android.intent.action.VIEW");
+            Uri url = Uri.parse("https://space.bilibili.com/35801833");
+            intent.setData(url);
+            startActivity(intent);
+        });
+        if (LauncherPreferences.DEFAULT_PREF.getBoolean("mio",true)){
+            AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                    .setTitle("提示")
+                    .setMessage("当前Pojav版本为@ShirosakiMio修改版，喜欢的话可以关注B站ShirosakiMio获取相关内容更新或是提出意见或者建议。点击”是“立即跳转。")
+                    .setPositiveButton("是", (dialogInterface, i) -> {
+                        SharedPreferences.Editor editor = LauncherPreferences.DEFAULT_PREF.edit();
+                        editor.putBoolean("mio",false);
+                        editor.apply();
+                        Intent intent = new Intent();
+                        intent.setAction("android.intent.action.VIEW");
+                        Uri url = Uri.parse("https://space.bilibili.com/35801833");
+                        intent.setData(url);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("取消",null)
+                    .create();
+            dialog.show();
+        }
     }
     private void runInstallerWithConfirmation(boolean isCustomArgs) {
         if (ProgressKeeper.getTaskCount() == 0)

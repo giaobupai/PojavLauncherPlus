@@ -84,7 +84,7 @@ public class ModSearchAdapter extends BaseAdapter {
         holder.infoText.setText(data.getSummary());
         holder.download.setOnClickListener(v->{
             ModDownloadFragment.data=data;
-            Tools.swapFragment(context, ModDownloadFragment.class, ModDownloadFragment.TAG, true, null);
+            Tools.swapFragmentAdd(context, ModDownloadFragment.class, ModDownloadFragment.TAG, true, null);
         });
 
         return convertView;
