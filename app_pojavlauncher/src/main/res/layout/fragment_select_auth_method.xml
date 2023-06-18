@@ -27,16 +27,14 @@
         android:id="@+id/button_microsoft_authentication"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Microsoft Account"
+        android:text="微软账户登录"
         android:textSize="@dimen/_12ssp"
         android:layout_marginHorizontal="@dimen/_25sdp"
-        android:layout_marginBottom="@dimen/_20sdp"
-        app:layout_constraintBottom_toTopOf="@+id/button_local_authentication"
         app:layout_constraintEnd_toEndOf="@+id/login_menu"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/login_menu"
         app:layout_constraintTop_toTopOf="@id/login_menu"
-        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintBottom_toTopOf="@id/button_local_authentication"
+        app:layout_constraintVertical_chainStyle="spread"
         />
 
     <com.kdt.mcgui.MineButton
@@ -46,25 +44,21 @@
         android:text="离线账户"
         android:textSize="@dimen/_12ssp"
         android:layout_marginHorizontal="@dimen/_25sdp"
-        android:layout_marginBottom="@dimen/_20sdp"
-        app:layout_constraintBottom_toBottomOf="@id/login_menu"
         app:layout_constraintEnd_toEndOf="@+id/login_menu"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/login_menu"
+        app:layout_constraintBottom_toTopOf="@id/button_other_authentication"
         app:layout_constraintTop_toBottomOf="@+id/button_microsoft_authentication" />
 
     <com.kdt.mcgui.MineButton
-        android:visibility="gone"
-        android:id="@+id/button_side_authentication"
+        android:id="@+id/button_other_authentication"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="外置登录"
+        android:text="第三方登录"
         android:textSize="@dimen/_12ssp"
         android:layout_marginHorizontal="@dimen/_25sdp"
-        app:layout_constraintBottom_toBottomOf="@id/login_menu"
         app:layout_constraintEnd_toEndOf="@+id/login_menu"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/login_menu"
+        app:layout_constraintBottom_toBottomOf="@id/login_menu"
         app:layout_constraintTop_toBottomOf="@+id/button_local_authentication" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
