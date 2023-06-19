@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -105,6 +106,8 @@ public class OtherLoginFragment extends Fragment {
                     .setTitle("请选择认证服务器类型")
                     .setItems(new String[]{"外置登录", "统一通行证"}, (d, i) -> {
                         EditText editText = new EditText(requireContext());
+                        editText.setMaxLines(1);
+                        editText.setInputType(InputType.TYPE_CLASS_TEXT);
                         AlertDialog dialog1 = new AlertDialog.Builder(requireContext())
                                 .setTitle("提示")
                                 .setView(editText)
