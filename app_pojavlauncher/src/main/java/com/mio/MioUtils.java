@@ -1,13 +1,21 @@
 package com.mio;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -37,5 +45,51 @@ public class MioUtils {
             return null;
         }
         return null;
+    }
+
+    public static boolean unZip(File zipFile, String descDir) {
+        boolean flag = false;
+        Log.e("测试",descDir);
+        if (!descDir.endsWith("/")){
+            descDir+="/";
+        }
+        File pathFile = new File(descDir);
+        if (!pathFile.exists()) {
+            pathFile.mkdirs();
+        }
+        ZipFile zip = null;
+        try {
+            // 指定编码，否则压缩包里面不能有中文目录
+            zip = new ZipFile(zipFile, StandardCharsets.UTF_8);
+            for (Enumeration<? extends ZipEntry> entries = zip.entries(); entries.hasMoreElements();) {
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+                String zipEntryName = entry.getName();
+                InputStream in = zip.getInputStream(entry);
+                String outPath = (descDir + zipEntryName).replace("/",
+                        File.separator);
+                File file = new File(outPath.substring(0,
+                        outPath.lastIndexOf(File.separator)));
+                if (!file.exists()) {
+                    file.mkdirs();
+                }
+                if (new File(outPath).isDirectory()) {
+                    continue;
+                }
+
+                OutputStream out = new FileOutputStream(outPath);
+                byte[] buf1 = new byte[2048];
+                int len;
+                while ((len = in.read(buf1)) > 0) {
+                    out.write(buf1, 0, len);
+                }
+                in.close();
+                out.close();
+            }
+            flag = true;
+            zip.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return flag;
     }
 }

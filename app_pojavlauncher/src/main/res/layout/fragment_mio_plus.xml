@@ -71,5 +71,14 @@
         android:text="MOD下载"
         app:layout_constraintTop_toBottomOf="@id/mod_manage_button" />
 
+    <com.kdt.mcgui.LauncherMenuButton
+        android:id="@+id/modpack_download_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_66sdp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableStart="@drawable/ic_gyroscope"
+        android:text="整合包安装"
+        app:layout_constraintTop_toBottomOf="@id/mod_download_button" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 

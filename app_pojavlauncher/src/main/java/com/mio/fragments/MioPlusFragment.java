@@ -1,31 +1,41 @@
 package com.mio.fragments;
 
+import static net.kdt.pojavlaunch.MainActivity.INTENT_MINECRAFT_VERSION;
+
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import com.kdt.mcgui.ProgressLayout;
 import com.mio.download.FabricDownload;
 import com.mio.download.ForgeDownload;
 import com.mio.download.OptifineDownload;
 
 import net.kdt.pojavlaunch.JMinecraftVersionList;
 import net.kdt.pojavlaunch.JavaGUILauncherActivity;
+import net.kdt.pojavlaunch.LauncherActivity;
+import net.kdt.pojavlaunch.MainActivity;
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
+import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
+import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
 import net.kdt.pojavlaunch.value.launcherprofiles.MinecraftProfile;
@@ -48,6 +58,7 @@ public class MioPlusFragment extends Fragment {
     public MioPlusFragment() {
         super(R.layout.fragment_mio_plus);
     }
+    public String selectedVersion;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -65,6 +76,7 @@ public class MioPlusFragment extends Fragment {
         Button customDirButton = view.findViewById(R.id.custom_dir_button);
         Button modManageButton = view.findViewById(R.id.mod_manage_button);
         Button modDownloadButton = view.findViewById(R.id.mod_download_button);
+        Button modPackDownloadButton = view.findViewById(R.id.modpack_download_button);
 
         String[] sourceItems = new String[]{"官方源", "BMCLAPI", "MCBBS"};
         changeDownloadSourceButton.setText("切换下载源(当前为" + sourceItems[LauncherPreferences.DEFAULT_PREF.getInt("downloadSource", 0)] + ")");
@@ -95,6 +107,7 @@ public class MioPlusFragment extends Fragment {
                     .setTitle("请选择版本")
                     .setItems(items, (dialogInterface, i) -> {
                         progressDialog.show();
+                        selectedVersion=items[i];
                         new Thread(() -> {
                             ForgeDownload forgeDownload = new ForgeDownload(items[i]);
                             List<String> forgeList = forgeDownload.getForgeVersions();
@@ -221,6 +234,51 @@ public class MioPlusFragment extends Fragment {
         });
         modDownloadButton.setOnClickListener(v -> {
             Tools.swapFragment(requireActivity(), ModSearchFragment.class, ModSearchFragment.TAG, true, null);
+        });
+        modPackDownloadButton.setOnClickListener(v -> {
+            AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                    .setTitle("提示")
+                    .setMessage("仅支持Curseforge整合包,下载完成需要自己调整才可使用,下载位置为"+Tools.DIR_GAME_HOME+"/整合包/整合包名")
+                    .setPositiveButton("确定", (d,i)->{
+                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("zip");
+                        if (mimeType == null) mimeType = "*/*";
+                        intent.setType(mimeType);
+                        requireActivity().startActivityForResult(intent, 1919810);
+                    })
+                    .setNegativeButton("取消",null)
+                    .create();
+            dialog.show();
+        });
+
+//        test();
+    }
+    public void test(){
+        String normalizedVersionId = "1.17";
+        JMinecraftVersionList.Version mcVersion = AsyncMinecraftDownloader.getListedVersion(normalizedVersionId);
+        View view= LayoutInflater.from(requireContext()).inflate(R.layout.dialog_mio_plus_download,null);
+        ProgressLayout mProgressLayout=view.findViewById(R.id.download_progress);
+        mProgressLayout.observe(ProgressLayout.DOWNLOAD_MINECRAFT);
+        mProgressLayout.observe(ProgressLayout.UNPACK_RUNTIME);
+        mProgressLayout.observe(ProgressLayout.INSTALL_MODPACK);
+        mProgressLayout.observe(ProgressLayout.AUTHENTICATE_MICROSOFT);
+        mProgressLayout.observe(ProgressLayout.DOWNLOAD_VERSION_LIST);
+        mProgressLayout.onClick(mProgressLayout);
+        AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                .setView(view)
+                .create();
+        dialog.show();
+        new AsyncMinecraftDownloader(requireActivity(), mcVersion, normalizedVersionId, new AsyncMinecraftDownloader.DoneListener() {
+            @Override
+            public void onDownloadDone() {
+                requireActivity().runOnUiThread(()->Toast.makeText(requireContext(),"下载完成",Toast.LENGTH_LONG).show());
+            }
+
+            @Override
+            public void onDownloadFailed(Throwable th) {
+                if(th != null) Tools.showError(requireContext(), R.string.mc_download_failed, th);
+            }
         });
     }
 

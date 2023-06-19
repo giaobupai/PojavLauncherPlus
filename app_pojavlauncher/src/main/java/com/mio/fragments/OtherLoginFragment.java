@@ -22,12 +22,17 @@ import androidx.fragment.app.Fragment;
 import com.google.gson.Gson;
 import com.kdt.mcgui.MineButton;
 import com.kdt.mcgui.MineEditText;
+import com.mio.login.AuthResult;
 import com.mio.login.MioLoginApi;
 import com.mio.login.Servers;
 
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
+import net.kdt.pojavlaunch.extra.ExtraConstants;
+import net.kdt.pojavlaunch.extra.ExtraCore;
+import net.kdt.pojavlaunch.fragments.MainMenuFragment;
+import net.kdt.pojavlaunch.value.MinecraftAccount;
 
 import org.json.JSONObject;
 
@@ -49,7 +54,7 @@ public class OtherLoginFragment extends Fragment {
     private File serversFile;
     private Servers servers;
     private List<String> serverList;
-    private String currentBaseUrl;
+    public String currentBaseUrl;
     private String currentRegisterUrl;
     private ArrayAdapter<String> serverSpinnerAdapter;
 
@@ -164,7 +169,72 @@ public class OtherLoginFragment extends Fragment {
             }
         });
         loginButton.setOnClickListener(v->{
+            progressDialog.show();
+            PojavApplication.sExecutorService.execute(()->{
+                String user=userEditText.getText().toString();
+                String pass=passEditText.getText().toString();
+                if (!user.equals("")&&!pass.equals("")){
+                    try {
+                        MioLoginApi.getINSTANCE().setBaseUrl(currentBaseUrl);
+                        MioLoginApi.getINSTANCE().login(user, pass, new MioLoginApi.Listener() {
+                            @Override
+                            public void onSuccess(AuthResult authResult) {
+                                requireActivity().runOnUiThread(()->{
+                                    progressDialog.dismiss();
+                                    MinecraftAccount account=new MinecraftAccount();
+                                    account.accessToken=authResult.getAccessToken();
+                                    account.baseUrl= currentBaseUrl;
+                                    account.account=userEditText.getText().toString();
+                                    account.password=passEditText.getText().toString();
+                                    if (!Objects.isNull(authResult.getSelectedProfile())){
+                                        account.username=authResult.getSelectedProfile().getName();
+                                        account.profileId=authResult.getSelectedProfile().getId();
+                                        ExtraCore.setValue(ExtraConstants.OTHER_LOGIN_TODO, account);
+                                        Tools.swapFragment(requireActivity(), MainMenuFragment.class, MainMenuFragment.TAG, false, null);
+                                    } else {
+                                        List<String> list=new ArrayList<>();
+                                        for(AuthResult.AvailableProfiles profiles:authResult.getAvailableProfiles()){
+                                            list.add(profiles.getName());
+                                        }
+                                        String[] items=list.toArray(new String[0]);
+                                        AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                                                .setTitle("请选择角色")
+                                                .setItems(items,(d,i)->{
+                                                    for(AuthResult.AvailableProfiles profiles:authResult.getAvailableProfiles()){
+                                                        if(profiles.getName().equals(items[i])){
+                                                            account.profileId=profiles.getId();
+                                                            account.username=profiles.getName();
+                                                        }
+                                                    }
+                                                    ExtraCore.setValue(ExtraConstants.OTHER_LOGIN_TODO, account);
+                                                    Tools.swapFragment(requireActivity(), MainMenuFragment.class, MainMenuFragment.TAG, false, null);
+                                                })
+                                                .setNegativeButton("取消",null)
+                                                .create();
+                                        dialog.show();
+                                    }
+                                });
+                            }
 
+                            @Override
+                            public void onFailed(String error) {
+                                requireActivity().runOnUiThread(()->{
+                                    progressDialog.dismiss();
+                                    AlertDialog dialog=new AlertDialog.Builder(requireContext())
+                                            .setTitle("警告")
+                                            .setTitle("登录时发生了错误：\n"+error)
+                                            .setPositiveButton("确定",null)
+                                            .create();
+                                    dialog.show();
+                                });
+                            }
+                        });
+                    } catch (IOException e) {
+                        requireActivity().runOnUiThread(()->progressDialog.dismiss());
+                        Log.e("登录",e.toString());
+                    }
+                }
+            });
         });
     }
 
@@ -177,6 +247,7 @@ public class OtherLoginFragment extends Fragment {
         if (serversFile.exists()) {
             try {
                 servers = new Gson().fromJson(Tools.read(serversFile.getAbsolutePath()), Servers.class);
+                currentBaseUrl=servers.getServer().get(0).getBaseUrl();
                 for (Servers.Server server : servers.getServer()) {
                     serverList.add(server.getServerName());
                 }

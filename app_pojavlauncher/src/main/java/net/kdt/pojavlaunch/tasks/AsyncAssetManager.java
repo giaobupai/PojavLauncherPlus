@@ -22,10 +22,12 @@ import java.io.InputStream;
 
 public class AsyncAssetManager {
 
-    private AsyncAssetManager(){}
+    private AsyncAssetManager() {
+    }
 
     /**
      * Attempt to install the java 8 runtime, if necessary
+     *
      * @param am App context
      */
     public static void unpackRuntime(AssetManager am) {
@@ -38,9 +40,10 @@ public class AsyncAssetManager {
             Log.e("JREAuto", "JRE was not included on this APK.", e);
         }
         String exactJREName = MultiRTUtils.getExactJreName(8);
-        if(current_rt_version == null && exactJREName != null && !exactJREName.equals("Internal")/*this clause is for when the internal runtime is goofed*/) return;
-        if(rt_version == null) return;
-        if(rt_version.equals(current_rt_version)) return;
+        if (current_rt_version == null && exactJREName != null && !exactJREName.equals("Internal")/*this clause is for when the internal runtime is goofed*/)
+            return;
+        if (rt_version == null) return;
+        if (rt_version.equals(current_rt_version)) return;
 
         // Install the runtime in an async manner, hope for the best
         String finalRt_version = rt_version;
@@ -52,14 +55,16 @@ public class AsyncAssetManager {
                         am.open("components/jre/bin-" + archAsString(Tools.DEVICE_ARCHITECTURE) + ".tar.xz"),
                         "Internal", finalRt_version);
                 MultiRTUtils.postPrepare("Internal");
-            }catch (IOException e) {
+            } catch (IOException e) {
                 Log.e("JREAuto", "Internal JRE unpack failed", e);
             }
         });
     }
 
-    /** Unpack single files, with no regard to version tracking */
-    public static void unpackSingleFiles(Context ctx){
+    /**
+     * Unpack single files, with no regard to version tracking
+     */
+    public static void unpackSingleFiles(Context ctx) {
         ProgressLayout.setProgress(ProgressLayout.EXTRACT_SINGLE_FILES, 0);
         sExecutorService.execute(() -> {
             try {
@@ -67,8 +72,22 @@ public class AsyncAssetManager {
                 Tools.copyAssetFile(ctx, "default.json", Tools.CTRLMAP_PATH, false);
 
                 Tools.copyAssetFile(ctx, "launcher_profiles.json", Tools.DIR_GAME_NEW, false);
-                Tools.copyAssetFile(ctx,"resolv.conf",Tools.DIR_DATA, false);
-                Tools.copyAssetFile(ctx,"arc_dns_injector.jar",Tools.DIR_DATA, false);
+                Tools.copyAssetFile(ctx, "resolv.conf", Tools.DIR_DATA, false);
+                Tools.copyAssetFile(ctx, "arc_dns_injector.jar", Tools.DIR_DATA, false);
+
+                File path = new File(Tools.DIR_GAME_HOME + "/login/version");
+                Tools.copyAssetFile(ctx,"login/version",path.getParent(),false);
+                InputStream in = ctx.getAssets().open("login/version");
+                byte[] b = new byte[in.available()];
+                in.read(b);
+                int newVersion = Integer.parseInt(new String(b));
+                in.close();
+                path.getParentFile().mkdirs();
+                int oldVersion = Integer.parseInt(Tools.read(Tools.DIR_GAME_HOME + "/login/version"));
+                boolean overwrite=newVersion>oldVersion;
+                Tools.copyAssetFile(ctx,"login/version",path.getParent(),overwrite);
+                Tools.copyAssetFile(ctx,"login/nide8auth.jar",path.getParent(),overwrite);
+                Tools.copyAssetFile(ctx,"login/authlib-injector.jar",path.getParent(),overwrite);
             } catch (IOException e) {
                 Log.e("AsyncAssetManager", "Failed to unpack critical components !");
             }
@@ -76,7 +95,7 @@ public class AsyncAssetManager {
         });
     }
 
-    public static void unpackComponents(Context ctx){
+    public static void unpackComponents(Context ctx) {
         ProgressLayout.setProgress(ProgressLayout.EXTRACT_COMPONENTS, 0);
         sExecutorService.execute(() -> {
             try {
@@ -87,7 +106,7 @@ public class AsyncAssetManager {
                 unpackComponent(ctx, "lwjgl3", false);
                 unpackComponent(ctx, "security", true);
             } catch (IOException e) {
-                Log.e("AsyncAssetManager", "Failed o unpack components !",e );
+                Log.e("AsyncAssetManager", "Failed o unpack components !", e);
             }
             ProgressLayout.clearProgress(ProgressLayout.EXTRACT_COMPONENTS);
         });
@@ -99,7 +118,7 @@ public class AsyncAssetManager {
 
         File versionFile = new File(rootDir + "/" + component + "/version");
         InputStream is = am.open("components/" + component + "/version");
-        if(!versionFile.exists()) {
+        if (!versionFile.exists()) {
             if (versionFile.getParentFile().exists() && versionFile.getParentFile().isDirectory()) {
                 FileUtils.deleteDirectory(versionFile.getParentFile());
             }
@@ -107,7 +126,7 @@ public class AsyncAssetManager {
 
             Log.i("UnpackPrep", component + ": Pack was installed manually, or does not exist, unpacking new...");
             String[] fileList = am.list("components/" + component);
-            for(String s : fileList) {
+            for (String s : fileList) {
                 Tools.copyAssetFile(ctx, "components/" + component + "/" + s, rootDir + "/" + component, true);
             }
         } else {

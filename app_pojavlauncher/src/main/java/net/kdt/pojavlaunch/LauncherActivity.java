@@ -24,9 +24,14 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.gson.Gson;
 import com.kdt.mcgui.ProgressLayout;
 import com.kdt.mcgui.mcAccountSpinner;
+import com.mio.MioDownloadTask;
+import com.mio.MioUtils;
 import com.mio.fragments.ModManageFragment;
+import com.mio.mod.curseforge.CurseforgeAPI;
+import com.mio.modpack.CurseforgeModpackManifest;
 
 import net.kdt.pojavlaunch.fragments.MainMenuFragment;
 import net.kdt.pojavlaunch.fragments.MicrosoftLoginFragment;
@@ -42,6 +47,7 @@ import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.services.ProgressServiceKeeper;
 import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
 import net.kdt.pojavlaunch.tasks.AsyncVersionList;
+import net.kdt.pojavlaunch.utils.DownloadUtils;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
 import net.kdt.pojavlaunch.value.launcherprofiles.MinecraftProfile;
 
@@ -51,6 +57,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class LauncherActivity extends BaseActivity {
     public static final String SETTING_FRAGMENT_TAG = "SETTINGS_FRAGMENT";
@@ -208,7 +219,7 @@ public class LauncherActivity extends BaseActivity {
 
         getSupportFragmentManager().unregisterFragmentLifecycleCallbacks(mFragmentCallbackListener);
     }
-
+    private ProgressDialog dialog;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -247,6 +258,70 @@ public class LauncherActivity extends BaseActivity {
                     LauncherActivity.this.runOnUiThread(() -> {
                         dialog.dismiss();
                     });
+                    Tools.showError(LauncherActivity.this, e);
+                }
+            });
+        }
+        if(requestCode == 1919810 && data != null){
+            dialog=new ProgressDialog(this);
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+            sExecutorService.execute(() -> {
+                try {
+                    Uri uri=data.getData();
+                    final String name = Tools.getFileName(LauncherActivity.this, uri);
+                    if (!name.endsWith(".zip")){
+                        LauncherActivity.this.runOnUiThread(() -> {
+                            dialog.dismiss();
+                            Toast.makeText(LauncherActivity.this,"所选择文件不是zip格式的整合包，请重新选择。",Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
+                    final File modPackFile = new File(Tools.DIR_GAME_HOME+"/整合包", name);
+                    if (!modPackFile.getParentFile().exists()){
+                        modPackFile.getParentFile().mkdirs();
+                    }
+                    FileOutputStream fos = new FileOutputStream(modPackFile);
+                    InputStream input = LauncherActivity.this.getContentResolver().openInputStream(uri);
+                    IOUtils.copy(input, fos);
+                    input.close();
+                    fos.close();
+
+                    if(!MioUtils.unZip(modPackFile,modPackFile.getAbsolutePath().replace(".zip","").replace(" ",""))){
+                        LauncherActivity.this.runOnUiThread(() -> {
+                            dialog.dismiss();
+                            Toast.makeText(LauncherActivity.this,"解压失败",Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
+                    File manifest=new File(modPackFile.getAbsolutePath().replace(".zip","").replace(" ",""),"manifest.json");
+                    if (!manifest.exists()){
+                        LauncherActivity.this.runOnUiThread(() -> {
+                            dialog.dismiss();
+                            Toast.makeText(LauncherActivity.this,"未找到manifest.json文件",Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
+                    CurseforgeModpackManifest modpackManifest=new Gson().fromJson(Tools.read(manifest.getAbsolutePath()),CurseforgeModpackManifest.class);
+                    List<CurseforgeModpackManifest.Files> filesList=modpackManifest.getFiles();
+                    runOnUiThread(()->dialog.dismiss());
+                    MioDownloadTask mioDownloadTask=new MioDownloadTask(LauncherActivity.this, new MioDownloadTask.Feedback() {
+                        @Override
+                        public void onFinished(Map<String, String> failedFile) {
+                            Toast.makeText(LauncherActivity.this,"整合包文件下载完成",Toast.LENGTH_LONG).show();
+                        }
+
+                        @Override
+                        public void onCancelled() {
+                            Toast.makeText(LauncherActivity.this,"已取消下载",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    mioDownloadTask.setModsPath(manifest.getParent()+"/mods/");
+                    mioDownloadTask.execute(filesList);
+
+                }catch(IOException e) {
+                    runOnUiThread(dialog::dismiss);
                     Tools.showError(LauncherActivity.this, e);
                 }
             });
