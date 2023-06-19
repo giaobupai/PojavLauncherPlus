@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.mio.adapter.ModPackVersionAdapter;
 import com.mio.adapter.ModSearchAdapter;
 import com.mio.adapter.ModVersionAdapter;
 import com.mio.mod.NameTranslator;
@@ -31,19 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class ModDownloadFragment extends Fragment {
-    public static final String TAG = "ModDownloadFragment";
+public class ModPackDownloadFragment extends Fragment {
+    public static final String TAG = "ModPackDownloadFragment";
     private ProgressDialog progressDialog;
     private ExpandableListView modVersionExpandableListView;
-    private LinearLayout modDependenceLinearLayout;
-    private ListView modDependenceListView;
+
     public static CurseAddon.Data data;
-    private List<Integer> depModID;
     private final CurseforgeAPI api = new CurseforgeAPI();
     private List<String> versionList;
     private List<List<CurseModFiles.Data>> modList;
 
-    public ModDownloadFragment() {
+    public ModPackDownloadFragment() {
         super(R.layout.fragment_mio_plus_mod_download);
     }
 
@@ -55,38 +54,7 @@ public class ModDownloadFragment extends Fragment {
         progressDialog.setCancelable(false);
         progressDialog.setCanceledOnTouchOutside(false);
 
-        modDependenceLinearLayout = view.findViewById(R.id.mod_dependence_linearlayout);
-        modDependenceListView = view.findViewById(R.id.mod_dependence);
         modVersionExpandableListView = view.findViewById(R.id.mod_version);
-
-        depModID = new ArrayList<>();
-        for (CurseAddon.Data.LatestFiles files : data.getLatestFiles()) {
-            for (CurseAddon.Data.LatestFiles.Dependencies dep : files.getDependencies()) {
-                if (!depModID.contains(dep.getModId())) {
-                    depModID.add(dep.getModId());
-                }
-            }
-        }
-        if (depModID.size() != 0) {
-            progressDialog.show();
-            modDependenceLinearLayout.setVisibility(View.VISIBLE);
-            PojavApplication.sExecutorService.execute(() -> {
-                List<CurseAddon.Data> dataList = new ArrayList<>();
-                for (int id : depModID) {
-                    CurseAddon.Data depData = api.getModByID(id);
-                    dataList.add(depData);
-                }
-                requireActivity().runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    if (!Objects.isNull(dataList)) {
-                        ModSearchAdapter modSearchAdapter = new ModSearchAdapter(requireActivity(), dataList, new NameTranslator(requireContext()));
-                        modDependenceListView.setAdapter(modSearchAdapter);
-                    } else {
-                        Toast.makeText(requireContext(), "获取mod列表失败！", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            });
-        }
 
         PojavApplication.sExecutorService.execute(() -> {
             List<CurseModFiles.Data> dataList = api.getModFiles(data.getId());
@@ -120,12 +88,12 @@ public class ModDownloadFragment extends Fragment {
                     modList.add(map.get(key));
                 }
                 requireActivity().runOnUiThread(() -> {
-                    ModVersionAdapter modVersionAdapter = new ModVersionAdapter(requireActivity(), versionList, modList, data.getId());
-                    modVersionExpandableListView.setAdapter(modVersionAdapter);
+                    ModPackVersionAdapter modPackVersionAdapter = new ModPackVersionAdapter(requireActivity(), versionList, modList, data.getId());
+                    modVersionExpandableListView.setAdapter(modPackVersionAdapter);
                 });
             } else {
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "获取mod列表失败！", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "获取整合包列表失败！", Toast.LENGTH_SHORT).show();
                 });
             }
         });

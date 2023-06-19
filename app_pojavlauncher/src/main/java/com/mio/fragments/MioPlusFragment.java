@@ -236,6 +236,9 @@ public class MioPlusFragment extends Fragment {
             Tools.swapFragment(requireActivity(), ModSearchFragment.class, ModSearchFragment.TAG, true, null);
         });
         modPackDownloadButton.setOnClickListener(v -> {
+            Tools.swapFragment(requireActivity(), ModPackSearchFragment.class, ModPackSearchFragment.TAG, true, null);
+        });
+        modPackDownloadButton.setOnLongClickListener(view1 -> {
             AlertDialog dialog=new AlertDialog.Builder(requireContext())
                     .setTitle("提示")
                     .setMessage("仅支持Curseforge整合包,下载完成需要自己调整才可使用,下载位置为"+Tools.DIR_GAME_HOME+"/整合包/整合包名")
@@ -250,6 +253,7 @@ public class MioPlusFragment extends Fragment {
                     .setNegativeButton("取消",null)
                     .create();
             dialog.show();
+            return false;
         });
 
 //        test();

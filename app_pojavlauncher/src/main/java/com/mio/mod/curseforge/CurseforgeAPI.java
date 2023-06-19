@@ -34,8 +34,16 @@ public class CurseforgeAPI {
             return null;
         }
         CurseAddon addon = new Gson().fromJson(json, CurseAddon.class);
-        List<CurseAddon.Data> dataList = addon.getData();
-        return dataList;
+        return addon.getData();
+    }
+
+    public List<CurseAddon.Data> searchModPack(String name, boolean hasName) {
+        String json = httpGet(PREFIX + "/v1/mods/search?gameId=432&classId=4471&sortField=2&sortOrder=desc" + (hasName ? ("&searchFilter=" + name) : ""));
+        if (json == null) {
+            return null;
+        }
+        CurseAddon addon = new Gson().fromJson(json, CurseAddon.class);
+        return addon.getData();
     }
 
     public CurseAddon.Data getModByID(int id) {
@@ -55,14 +63,8 @@ public class CurseforgeAPI {
         if (json == null) {
             return null;
         }
-        try {
-            Tools.write(Tools.DIR_GAME_NEW+"/a.json",json);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         CurseModFiles addon = new Gson().fromJson(json, CurseModFiles.class);
-        List<CurseModFiles.Data> dataList = addon.getData();
-        return dataList;
+        return addon.getData();
     }
 
     public void getFeaturedMods() {
@@ -103,7 +105,7 @@ public class CurseforgeAPI {
             }
             return url+"澪"+data.getFileName();
         } catch (Exception e) {
-            Log.e("测试","getDownloadUrl:"+e.toString());
+            Log.e("测试","getDownloadUrlAndName:"+e.toString());
         }
         return null;
     }

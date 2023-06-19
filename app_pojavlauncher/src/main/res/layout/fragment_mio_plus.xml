@@ -77,7 +77,7 @@
         android:layout_height="@dimen/_66sdp"
         android:background="?android:attr/selectableItemBackground"
         android:drawableStart="@drawable/ic_gyroscope"
-        android:text="整合包安装"
+        android:text="整合包安装(长按逝世)"
         app:layout_constraintTop_toBottomOf="@id/mod_download_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

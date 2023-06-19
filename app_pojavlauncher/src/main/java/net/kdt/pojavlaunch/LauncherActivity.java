@@ -263,18 +263,18 @@ public class LauncherActivity extends BaseActivity {
             });
         }
         if(requestCode == 1919810 && data != null){
-            dialog=new ProgressDialog(this);
+            ProgressDialog dialog=new ProgressDialog(this);
             dialog.setCancelable(false);
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
-            sExecutorService.execute(() -> {
+            PojavApplication.sExecutorService.execute(() -> {
                 try {
                     Uri uri=data.getData();
-                    final String name = Tools.getFileName(LauncherActivity.this, uri);
+                    final String name = Tools.getFileName(this, uri);
                     if (!name.endsWith(".zip")){
-                        LauncherActivity.this.runOnUiThread(() -> {
+                        runOnUiThread(() -> {
                             dialog.dismiss();
-                            Toast.makeText(LauncherActivity.this,"所选择文件不是zip格式的整合包，请重新选择。",Toast.LENGTH_LONG).show();
+                            Toast.makeText(this,"所选择文件不是zip格式的整合包，请重新选择。",Toast.LENGTH_LONG).show();
                         });
                         return;
                     }
@@ -283,48 +283,18 @@ public class LauncherActivity extends BaseActivity {
                         modPackFile.getParentFile().mkdirs();
                     }
                     FileOutputStream fos = new FileOutputStream(modPackFile);
-                    InputStream input = LauncherActivity.this.getContentResolver().openInputStream(uri);
+                    InputStream input = getContentResolver().openInputStream(uri);
                     IOUtils.copy(input, fos);
                     input.close();
                     fos.close();
-
-                    if(!MioUtils.unZip(modPackFile,modPackFile.getAbsolutePath().replace(".zip","").replace(" ",""))){
-                        LauncherActivity.this.runOnUiThread(() -> {
-                            dialog.dismiss();
-                            Toast.makeText(LauncherActivity.this,"解压失败",Toast.LENGTH_LONG).show();
-                        });
-                        return;
-                    }
-                    File manifest=new File(modPackFile.getAbsolutePath().replace(".zip","").replace(" ",""),"manifest.json");
-                    if (!manifest.exists()){
-                        LauncherActivity.this.runOnUiThread(() -> {
-                            dialog.dismiss();
-                            Toast.makeText(LauncherActivity.this,"未找到manifest.json文件",Toast.LENGTH_LONG).show();
-                        });
-                        return;
-                    }
-                    CurseforgeModpackManifest modpackManifest=new Gson().fromJson(Tools.read(manifest.getAbsolutePath()),CurseforgeModpackManifest.class);
-                    List<CurseforgeModpackManifest.Files> filesList=modpackManifest.getFiles();
-                    runOnUiThread(()->dialog.dismiss());
-                    MioDownloadTask mioDownloadTask=new MioDownloadTask(LauncherActivity.this, new MioDownloadTask.Feedback() {
-                        @Override
-                        public void onFinished(Map<String, String> failedFile) {
-                            Toast.makeText(LauncherActivity.this,"整合包文件下载完成",Toast.LENGTH_LONG).show();
-                        }
-
-                        @Override
-                        public void onCancelled() {
-                            Toast.makeText(LauncherActivity.this,"已取消下载",Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    mioDownloadTask.setModsPath(manifest.getParent()+"/mods/");
-                    mioDownloadTask.execute(filesList);
-
-                }catch(IOException e) {
+                    runOnUiThread(dialog::dismiss);
+                    runOnUiThread(()->MioUtils.installModPack(LauncherActivity.this,modPackFile.getAbsolutePath()));
+                }catch (Exception e){
                     runOnUiThread(dialog::dismiss);
                     Tools.showError(LauncherActivity.this, e);
                 }
             });
+
         }
     }
 
