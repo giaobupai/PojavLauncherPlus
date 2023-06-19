@@ -281,7 +281,7 @@ public class mcAccountSpinner extends AppCompatSpinner implements AdapterView.On
 
     private void performLogin(MinecraftAccount minecraftAccount){
         if(minecraftAccount.isLocal()) return;
-        if (!Objects.isNull(minecraftAccount.baseUrl)||!minecraftAccount.baseUrl.equals("0")){
+        if (!Objects.isNull(minecraftAccount.baseUrl)&&!minecraftAccount.baseUrl.equals("0")){
             MioLoginApi.getINSTANCE().setBaseUrl(minecraftAccount.baseUrl);
             PojavApplication.sExecutorService.execute(()->{
                 try {
