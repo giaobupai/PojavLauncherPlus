@@ -185,6 +185,7 @@ public final class Tools {
         String launchClassPath = generateLaunchClassPath(versionInfo, versionId);
 
         List<String> javaArgList = new ArrayList<>();
+        javaArgList.add("-Dorg.lwjgl.util.NoChecks=true");
 
         if (!Objects.isNull(minecraftAccount.baseUrl)&&!minecraftAccount.baseUrl.equals("0")){
             if(minecraftAccount.baseUrl.contains("auth.mc-user.com")){
@@ -391,17 +392,6 @@ public final class Tools {
         }
         //strList.add("--fullscreen");
         return strList.toArray(new String[0]);
-    }
-
-    public static String artifactToPath(String name) {
-        int idx = name.indexOf(":");
-        assert idx != -1;
-        int idx2 = name.indexOf(":", idx+1);
-        assert idx2 != -1;
-        String group = name.substring(0, idx);
-        String artifact = name.substring(idx+1, idx2);
-        String version = name.substring(idx2+1).replace(':','-');
-        return group.replaceAll("\\.", "/") + "/" + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
     }
 
     public static String getPatchedFile(String version) {
@@ -626,7 +616,7 @@ public final class Tools {
         List<String> libDir = new ArrayList<>();
         for (DependentLibrary libItem: info.libraries) {
             if(!checkRules(libItem.rules)) continue;
-            libDir.add(Tools.DIR_HOME_LIBRARY + "/" + Tools.artifactToPath(libItem.name));
+            libDir.add(Tools.DIR_HOME_LIBRARY + "/" + libItem.downloads.artifact.path);
         }
         return libDir.toArray(new String[0]);
     }
