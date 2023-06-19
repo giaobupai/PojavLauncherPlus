@@ -81,7 +81,7 @@ public class MainMenuFragment extends Fragment {
                     .setPositiveButton("是", (dialogInterface, i) -> {
                         SharedPreferences.Editor editor = LauncherPreferences.DEFAULT_PREF.edit();
                         editor.putBoolean("mio",false);
-                        editor.apply();
+                        editor.commit();
                         Intent intent = new Intent();
                         intent.setAction("android.intent.action.VIEW");
                         Uri url = Uri.parse("https://space.bilibili.com/35801833");
