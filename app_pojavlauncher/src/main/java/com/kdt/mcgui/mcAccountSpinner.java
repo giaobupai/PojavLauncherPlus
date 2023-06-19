@@ -281,13 +281,14 @@ public class mcAccountSpinner extends AppCompatSpinner implements AdapterView.On
 
     private void performLogin(MinecraftAccount minecraftAccount){
         if(minecraftAccount.isLocal()) return;
-        if (!Objects.isNull(minecraftAccount.baseUrl)&&!minecraftAccount.baseUrl.equals("0")){
+        if (!Objects.isNull(minecraftAccount.baseUrl)&&!minecraftAccount.baseUrl.equals("0")&&System.currentTimeMillis() > minecraftAccount.expiresAt){
             MioLoginApi.getINSTANCE().setBaseUrl(minecraftAccount.baseUrl);
             PojavApplication.sExecutorService.execute(()->{
                 try {
                     MioLoginApi.getINSTANCE().login(minecraftAccount.account, minecraftAccount.password, new MioLoginApi.Listener() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
+                            minecraftAccount.expiresAt=System.currentTimeMillis()+30*60*1000;
                             minecraftAccount.accessToken=authResult.getAccessToken();
                             ((Activity)getContext()).runOnUiThread(()->{
                                 ExtraCore.setValue(ExtraConstants.OTHER_LOGIN_TODO, minecraftAccount);

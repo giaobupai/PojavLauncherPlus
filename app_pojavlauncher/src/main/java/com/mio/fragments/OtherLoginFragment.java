@@ -189,6 +189,7 @@ public class OtherLoginFragment extends Fragment {
                                     account.baseUrl= currentBaseUrl;
                                     account.account=userEditText.getText().toString();
                                     account.password=passEditText.getText().toString();
+                                    account.expiresAt=System.currentTimeMillis()+30*60*1000;
                                     if (!Objects.isNull(authResult.getSelectedProfile())){
                                         account.username=authResult.getSelectedProfile().getName();
                                         account.profileId=authResult.getSelectedProfile().getId();
