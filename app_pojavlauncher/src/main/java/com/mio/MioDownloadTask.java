@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,7 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
     private AlertDialog mDialog;
     private CurseforgeAPI api = new CurseforgeAPI();
     private String modsPath;
+    private final ConcurrentHashMap<Thread, byte[]> mThreadBuffers = new ConcurrentHashMap<>(maxTask);
 
     public abstract static class Feedback {
         public abstract void onFinished(Map<String, String> failedFile);
@@ -114,7 +116,7 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
                 0, TimeUnit.SECONDS,
                 workQueue,
                 new ThreadPoolExecutor.DiscardPolicy());
-        byte[] b = new byte[1024];
+
         for (int j = 0; j < tasks.size(); j++) {
             CurseforgeModpackManifest.Files files = tasks.get(j);
             threadPool.execute(() -> {
@@ -141,7 +143,7 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
                         ctx.get().runOnUiThread(() -> {
                             fileAdapter.addDownload(info);
                         });
-                        DownloadUtils.downloadFileMonitored(url, path, b, (curr, max) -> {
+                        DownloadUtils.downloadFileMonitored(url, path, getByteBuffer(), (curr, max) -> {
                                     long p = curr * 100 / max;
                                     if (p%10>8){
                                         info.progress = (int) p;
@@ -199,6 +201,14 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
     protected void onCancelled(Map<String, String> result) {
         mDialog.dismiss();
         feedback.onCancelled();
+    }
+    private byte[] getByteBuffer(){
+        byte[] buffer = mThreadBuffers.get(Thread.currentThread());
+        if (buffer == null){
+            buffer = new byte[1024];
+            mThreadBuffers.put(Thread.currentThread(), buffer);
+        }
+        return buffer;
     }
 
     public class DownloadInfo {
