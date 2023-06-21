@@ -49,7 +49,7 @@ public class NameTranslator {
         Set<String> keys=map.keySet();
         for (String key:keys){
             String value=map.get(key);
-            if (value.contains(str)){
+            if (value.equals(str)){
                 return key;
             }
         }

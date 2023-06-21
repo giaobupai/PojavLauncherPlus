@@ -73,8 +73,9 @@ public class ModSearchAdapter extends BaseAdapter {
             return convertView;
         }
         try {
+            //getLogo()可能为null
             Glide.with(context).load(data.getLogo().getUrl()).into(holder.logo);
-        }catch (Exception e){
+        }catch (Exception ignored){
 
         }
         String trans=nameTranslator.translateEnToCh(data.getName().replaceAll("(\\()(.*?)(\\))", "").trim());
