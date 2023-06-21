@@ -2,17 +2,11 @@ package com.mio;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.FragmentActivity;
 
 import com.google.gson.Gson;
-import com.mio.fragments.MioPlusFragment;
 import com.mio.modpack.CurseforgeModpackManifest;
 
 import net.kdt.pojavlaunch.PojavApplication;
@@ -20,21 +14,15 @@ import net.kdt.pojavlaunch.Tools;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
