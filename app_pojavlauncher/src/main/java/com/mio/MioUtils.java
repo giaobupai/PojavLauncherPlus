@@ -18,6 +18,8 @@ import com.mio.modpack.CurseforgeModpackManifest;
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.Tools;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,6 +28,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,22 +38,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 public class MioUtils {
     public static String getModInfo(String path){
         try{
-            InputStream in=new BufferedInputStream(new FileInputStream(path));
-            ZipInputStream zin=new ZipInputStream(in);
-            ZipFile zf=new ZipFile(path);
-            //ZipEntry 类用于表示 ZIP 文件条目。
-            ZipEntry ze;
-            while((ze=zin.getNextEntry())!=null){
-                if(ze.getName().equals("mcmod.info")){
-
-                    BufferedReader br =new BufferedReader(new InputStreamReader(zf.getInputStream(ze)));
+            ZipFile zipFile = new ZipFile(path);
+            ZipArchiveEntry entry = zipFile.getEntry("mcmod.info");
+            try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                try (BufferedReader br =new BufferedReader(new InputStreamReader(inputStream))) {
                     String line="";
                     String str="";
                     while ((line =br.readLine()) !=null) {
@@ -58,59 +53,59 @@ public class MioUtils {
                     }
                     JSONObject jsonobj=new JSONObject(new JSONArray(str).get(0).toString());
                     return jsonobj.getString("name");
+                } catch (Exception e){
+                    e.printStackTrace();
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }catch(Exception e){
+            e.printStackTrace();
             return null;
         }
         return null;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public static boolean unZip(File zipFile, String descDir) {
-        boolean flag = false;
-        Log.e("测试",descDir);
-        if (!descDir.endsWith("/")){
-            descDir+="/";
-        }
-        File pathFile = new File(descDir);
-        if (!pathFile.exists()) {
-            pathFile.mkdirs();
-        }
-        ZipFile zip = null;
+    public static boolean unZip(File file, String descDir) {
         try {
-            // 指定编码，否则压缩包里面不能有中文目录
-            zip = new ZipFile(zipFile, StandardCharsets.UTF_8);
-            for (Enumeration<? extends ZipEntry> entries = zip.entries(); entries.hasMoreElements();) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
-                String zipEntryName = entry.getName();
-                InputStream in = zip.getInputStream(entry);
-                String outPath = (descDir + zipEntryName).replace("/",
-                        File.separator);
-                File file = new File(outPath.substring(0,
-                        outPath.lastIndexOf(File.separator)));
-                if (!file.exists()) {
-                    file.mkdirs();
-                }
-                if (new File(outPath).isDirectory()) {
+            if (!descDir.endsWith("/")){
+                descDir+="/";
+            }
+            File pathFile = new File(descDir);
+            if (!pathFile.exists()) {
+                pathFile.mkdirs();
+            }
+            ZipFile zipFile = new ZipFile(file);
+            byte[] buffer = new byte[2048];
+            ZipArchiveEntry entry;
+            Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
+            while (entries.hasMoreElements()) {
+                entry = entries.nextElement();
+                if (entry.isDirectory()) {
                     continue;
                 }
-
-                OutputStream out = new FileOutputStream(outPath);
-                byte[] buf1 = new byte[2048];
-                int len;
-                while ((len = in.read(buf1)) > 0) {
-                    out.write(buf1, 0, len);
+                File outputFile = new File(descDir + entry.getName());
+                if (!outputFile.getParentFile().exists()) {
+                    outputFile.getParentFile().mkdirs();
                 }
-                in.close();
-                out.close();
+                try(InputStream inputStream = zipFile.getInputStream(entry)){
+                    try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                        int len;
+                        while ((len = inputStream.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
-            flag = true;
-            zip.close();
-        } catch (IOException e) {
+            return true;
+        }catch (Exception e){
             e.printStackTrace();
         }
-        return flag;
+        return false;
     }
     
     public static void installModPack(Activity activity,String path){
