@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -27,18 +28,24 @@ import com.mio.download.OptifineDownload;
 import net.kdt.pojavlaunch.JMinecraftVersionList;
 import net.kdt.pojavlaunch.JavaGUILauncherActivity;
 import net.kdt.pojavlaunch.LauncherActivity;
+import net.kdt.pojavlaunch.Logger;
 import net.kdt.pojavlaunch.MainActivity;
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
+import net.kdt.pojavlaunch.multirt.MultiRTUtils;
+import net.kdt.pojavlaunch.multirt.Runtime;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.progresskeeper.ProgressKeeper;
 import net.kdt.pojavlaunch.tasks.AsyncMinecraftDownloader;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
+import net.kdt.pojavlaunch.utils.JREUtils;
 import net.kdt.pojavlaunch.value.launcherprofiles.LauncherProfiles;
 import net.kdt.pojavlaunch.value.launcherprofiles.MinecraftProfile;
+
+import org.lwjgl.glfw.CallbackBridge;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +71,7 @@ public class MioPlusFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        Logger.begin(new File(Tools.DIR_GAME_HOME, "latestlog.txt").getAbsolutePath());
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setCancelable(false);
         progressDialog.setCanceledOnTouchOutside(false);
@@ -255,7 +262,18 @@ public class MioPlusFragment extends Fragment {
             dialog.show();
             return false;
         });
-
+//        new Thread(() -> launchJavaRuntime(new File(Tools.DIR_GAME_HOME+"/forge-installer-47.0.35.jar")), "JREMainThread").start();
+//        new Thread(()->{
+//            while (true){
+//                try {
+//                    Log.e("测试",""+CallbackBridge.nativeGetInstallProgress());
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//
+//        }).start();
 //        test();
     }
     public void test(){
@@ -301,6 +319,7 @@ public class MioPlusFragment extends Fragment {
                         progressDialog.dismiss();
                         progressDialog = new ProgressDialog(requireContext());
                         if (install) {
+//                            new Thread(() -> launchJavaRuntime(new File(dest)), "JREMainThread").start();
                             Intent intent = new Intent(requireActivity(), JavaGUILauncherActivity.class);
                             intent.putExtra("modFile", new File(dest));
                             requireActivity().startActivity(intent);
@@ -316,7 +335,26 @@ public class MioPlusFragment extends Fragment {
             }
         });
     }
+    public int launchJavaRuntime(File modFile) {
+        JREUtils.redirectAndPrintJRELog();
+        try {
+            String jreName = LauncherPreferences.PREF_DEFAULT_RUNTIME;
+            final Runtime runtime = MultiRTUtils.forceReread(jreName);
+            List<String> javaArgList = new ArrayList<>();
 
+            javaArgList.add("-cp");
+            javaArgList.add(".:"+Tools.DIR_GAME_HOME + "/login/forge-install-bootstrapper.jar:"+modFile.getAbsolutePath()+":"+Tools.DIR_GAME_HOME+"/lwjgl3/lwjgl-glfw-classes.jar");
+            javaArgList.add("com.bangbang93.ForgeInstaller");
+            javaArgList.add(Tools.DIR_GAME_NEW);
+
+            Logger.appendToLog("Info: Java arguments: " + Arrays.toString(javaArgList.toArray(new String[0])));
+
+            return JREUtils.launchJavaVM(requireActivity(), runtime,null,javaArgList, LauncherPreferences.PREF_CUSTOM_JAVA_ARGS);
+        } catch (Throwable th) {
+            Tools.showError(requireContext(), th, true);
+            return -1;
+        }
+    }
     public static boolean isHigher(String version1, String version2) {
         if (version1.equals(version2)) {
             return false;
