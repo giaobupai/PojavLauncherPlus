@@ -1,6 +1,5 @@
 package com.mio.fragments;
 
-import static com.mio.fragments.MioPlusFragment.isHigher;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -14,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.mio.MioUtils;
 import com.mio.adapter.ModSearchAdapter;
 import com.mio.adapter.ModVersionAdapter;
 import com.mio.mod.NameTranslator;
@@ -109,7 +109,7 @@ public class ModDownloadFragment extends Fragment {
                 versionList = new ArrayList<>();
                 versionList.addAll(map.keySet());
                 Collections.sort(versionList, (o1, o2) -> {
-                    if (!isHigher(o1, o2)) {
+                    if (!MioUtils.isHigher(o1, o2)) {
                         return 1;
                     } else {
                         return -1;

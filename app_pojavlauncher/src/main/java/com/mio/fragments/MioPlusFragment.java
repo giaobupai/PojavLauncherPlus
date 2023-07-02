@@ -21,6 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.kdt.mcgui.ProgressLayout;
+import com.mio.MioUtils;
 import com.mio.download.FabricDownload;
 import com.mio.download.ForgeDownload;
 import com.mio.download.OptifineDownload;
@@ -84,6 +85,7 @@ public class MioPlusFragment extends Fragment {
         Button modManageButton = view.findViewById(R.id.mod_manage_button);
         Button modDownloadButton = view.findViewById(R.id.mod_download_button);
         Button modPackDownloadButton = view.findViewById(R.id.modpack_download_button);
+        Button autoInstallButton = view.findViewById(R.id.auto_install_button);
 
         String[] sourceItems = new String[]{"官方源", "BMCLAPI", "MCBBS"};
         changeDownloadSourceButton.setText("切换下载源(当前为" + sourceItems[LauncherPreferences.DEFAULT_PREF.getInt("downloadSource", 0)] + ")");
@@ -120,7 +122,7 @@ public class MioPlusFragment extends Fragment {
                             List<String> forgeList = forgeDownload.getForgeVersions();
                             String[] forgeItems = forgeList.toArray(new String[0]);
                             Arrays.sort(forgeItems, (o1, o2) -> {
-                                if (!isHigher(o1, o2)) {
+                                if (!MioUtils.isHigher(o1, o2)) {
                                     return 1;
                                 } else {
                                     return -1;
@@ -262,6 +264,9 @@ public class MioPlusFragment extends Fragment {
             dialog.show();
             return false;
         });
+        autoInstallButton.setOnClickListener(v->{
+            Tools.swapFragment(requireActivity(), MioInstallFragment.class, MioInstallFragment.TAG, true, null);
+        });
 //        new Thread(() -> launchJavaRuntime(new File(Tools.DIR_GAME_HOME+"/forge-installer-47.0.35.jar")), "JREMainThread").start();
 //        new Thread(()->{
 //            while (true){
@@ -353,40 +358,6 @@ public class MioPlusFragment extends Fragment {
         } catch (Throwable th) {
             Tools.showError(requireContext(), th, true);
             return -1;
-        }
-    }
-    public static boolean isHigher(String version1, String version2) {
-        if (version1.equals(version2)) {
-            return false;
-        }
-        if(version1.contains("-")){
-            version1=version1.substring(0,version1.indexOf("-"));
-        }
-        if (version2.contains("-")){
-            version2=version2.substring(0,version2.indexOf("-"));
-        }
-        String[] version1Array = version1.split("\\.");
-        String[] version2Array = version2.split("\\.");
-        int index = 0;
-        int minLen = Math.min(version1Array.length, version2Array.length);
-        int diff = 0;
-        while (index < minLen && (diff = Integer.parseInt(version1Array[index]) - Integer.parseInt(version2Array[index])) == 0) {
-            index++;
-        }
-        if (diff == 0) {
-            for (int i = index; i < version1Array.length; i++) {
-                if (Integer.parseInt(version1Array[i]) > 0) {
-                    return true;
-                }
-            }
-            for (int i = index; i < version2Array.length; i++) {
-                if (Integer.parseInt(version2Array[i]) > 0) {
-                    return false;
-                }
-            }
-            return false;
-        } else {
-            return diff > 0 ? true : false;
         }
     }
 }

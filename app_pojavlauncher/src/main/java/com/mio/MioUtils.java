@@ -150,4 +150,38 @@ public class MioUtils {
             }
         });
     }
+    public static boolean isHigher(String version1, String version2) {
+        if (version1.equals(version2)) {
+            return false;
+        }
+        if(version1.contains("-")){
+            version1=version1.substring(0,version1.indexOf("-"));
+        }
+        if (version2.contains("-")){
+            version2=version2.substring(0,version2.indexOf("-"));
+        }
+        String[] version1Array = version1.split("\\.");
+        String[] version2Array = version2.split("\\.");
+        int index = 0;
+        int minLen = Math.min(version1Array.length, version2Array.length);
+        int diff = 0;
+        while (index < minLen && (diff = Integer.parseInt(version1Array[index]) - Integer.parseInt(version2Array[index])) == 0) {
+            index++;
+        }
+        if (diff == 0) {
+            for (int i = index; i < version1Array.length; i++) {
+                if (Integer.parseInt(version1Array[i]) > 0) {
+                    return true;
+                }
+            }
+            for (int i = index; i < version2Array.length; i++) {
+                if (Integer.parseInt(version2Array[i]) > 0) {
+                    return false;
+                }
+            }
+            return false;
+        } else {
+            return diff > 0 ? true : false;
+        }
+    }
 }
