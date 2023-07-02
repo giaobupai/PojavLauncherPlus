@@ -89,6 +89,7 @@ public class AsyncAssetManager {
                 Tools.copyAssetFile(ctx,"login/nide8auth.jar",path.getParent(),overwrite);
                 Tools.copyAssetFile(ctx,"login/authlib-injector.jar",path.getParent(),overwrite);
                 Tools.copyAssetFile(ctx,"login/forge-install-bootstrapper.jar",path.getParent(),overwrite);
+                Tools.copyAssetFile(ctx,"resolv.conf",Tools.DIR_DATA, false);
             } catch (IOException e) {
                 Log.e("AsyncAssetManager", "Failed to unpack critical components !");
             }
@@ -106,6 +107,8 @@ public class AsyncAssetManager {
                 // we repack them to a single file here
                 unpackComponent(ctx, "lwjgl3", false);
                 unpackComponent(ctx, "security", true);
+                unpackComponent(ctx, "arc_dns_injector", true);
+                unpackComponent(ctx, "forge_installer", true);
             } catch (IOException e) {
                 Log.e("AsyncAssetManager", "Failed o unpack components !", e);
             }
