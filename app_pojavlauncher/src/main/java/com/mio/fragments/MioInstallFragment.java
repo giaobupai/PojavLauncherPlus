@@ -1,7 +1,6 @@
 package com.mio.fragments;
 
 import static net.kdt.pojavlaunch.extra.ExtraCore.getValue;
-import static net.kdt.pojavlaunch.profiles.ProfileAdapter.CREATE_PROFILE_MAGIC;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
