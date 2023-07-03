@@ -133,7 +133,7 @@ public class MioPlusFragment extends Fragment {
                                 AlertDialog tempDialog = new AlertDialog.Builder(requireContext())
                                         .setTitle("请选择Forge版本")
                                         .setItems(forgeItems, (d, j) -> {
-                                            download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/forge-installer-" + forgeItems[j] + ".jar", true);
+                                            download(forgeDownload.getDownloadLink(forgeItems[j]), Tools.DIR_GAME_HOME + "/MioPlus/forge-installer-"+items[i] + "-" + forgeItems[j] + ".jar", true);
                                         })
                                         .setNegativeButton("取消", null)
                                         .create();
@@ -157,7 +157,7 @@ public class MioPlusFragment extends Fragment {
                     AlertDialog dialog = new AlertDialog.Builder(requireContext())
                             .setTitle("请选择fabric版本")
                             .setItems(items, (dialogInterface, i) -> {
-                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/fabric-installer-" + items[i] + ".jar", true);
+                                download(fabricDownload.getDownloadLink(items[i]), Tools.DIR_GAME_HOME + "/MioPlus/fabric-installer-" + items[i] + ".jar", true);
                             })
                             .setNegativeButton("取消", null)
                             .create();
@@ -280,33 +280,6 @@ public class MioPlusFragment extends Fragment {
 //
 //        }).start();
 //        test();
-    }
-    public void test(){
-        String normalizedVersionId = "1.17";
-        JMinecraftVersionList.Version mcVersion = AsyncMinecraftDownloader.getListedVersion(normalizedVersionId);
-        View view= LayoutInflater.from(requireContext()).inflate(R.layout.dialog_mio_plus_download,null);
-        ProgressLayout mProgressLayout=view.findViewById(R.id.download_progress);
-        mProgressLayout.observe(ProgressLayout.DOWNLOAD_MINECRAFT);
-        mProgressLayout.observe(ProgressLayout.UNPACK_RUNTIME);
-        mProgressLayout.observe(ProgressLayout.INSTALL_MODPACK);
-        mProgressLayout.observe(ProgressLayout.AUTHENTICATE_MICROSOFT);
-        mProgressLayout.observe(ProgressLayout.DOWNLOAD_VERSION_LIST);
-        mProgressLayout.onClick(mProgressLayout);
-        AlertDialog dialog=new AlertDialog.Builder(requireContext())
-                .setView(view)
-                .create();
-        dialog.show();
-        new AsyncMinecraftDownloader(requireActivity(), mcVersion, normalizedVersionId, new AsyncMinecraftDownloader.DoneListener() {
-            @Override
-            public void onDownloadDone() {
-                requireActivity().runOnUiThread(()->Toast.makeText(requireContext(),"下载完成",Toast.LENGTH_LONG).show());
-            }
-
-            @Override
-            public void onDownloadFailed(Throwable th) {
-                if(th != null) Tools.showError(requireContext(), R.string.mc_download_failed, th);
-            }
-        });
     }
 
     private void download(String url, String dest, boolean install) {

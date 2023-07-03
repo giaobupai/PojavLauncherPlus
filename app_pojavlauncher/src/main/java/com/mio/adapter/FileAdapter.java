@@ -1,7 +1,6 @@
 package com.mio.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
-import com.mio.MioDownloadTask;
+import com.mio.download.DownloadInfo;
 
 import net.kdt.pojavlaunch.R;
 
@@ -19,21 +18,21 @@ import java.util.List;
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     private Context context;
-    private List<MioDownloadTask.DownloadInfo> downloads;
+    private List<DownloadInfo> downloads;
 
     public FileAdapter(Context context) {
         this.context = context;
         downloads = new ArrayList<>();
     }
 
-    public void addDownload(MioDownloadTask.DownloadInfo download) {
+    public void addDownload(DownloadInfo download) {
         downloads.add(download);
         notifyItemInserted(downloads.size() - 1);
     }
 
-    public void onProgress(MioDownloadTask.DownloadInfo download) {
+    public void onProgress(DownloadInfo download) {
         for (int i = 0; i < downloads.size(); i++) {
-            MioDownloadTask.DownloadInfo tmp = downloads.get(i);
+            DownloadInfo tmp = downloads.get(i);
             if (tmp.url.equals(download.url)) {
                 downloads.set(i, download);
                 notifyItemChanged(i);
@@ -41,9 +40,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         }
     }
 
-    public void onComplete(MioDownloadTask.DownloadInfo download) {
+    public void onComplete(DownloadInfo download) {
         for (int i = 0; i < downloads.size(); i++) {
-            MioDownloadTask.DownloadInfo tmp = downloads.get(i);
+            DownloadInfo tmp = downloads.get(i);
             if (tmp.url.equals(download.url)) {
                 downloads.remove(i);
                 notifyItemRemoved(i);
@@ -60,7 +59,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        MioDownloadTask.DownloadInfo mDownload = downloads.get(position);
+        DownloadInfo mDownload = downloads.get(position);
         holder.progressBar.setProgress(mDownload.progress);
         holder.fileName.setText(mDownload.name);
     }

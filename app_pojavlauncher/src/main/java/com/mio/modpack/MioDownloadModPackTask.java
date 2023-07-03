@@ -1,11 +1,9 @@
-package com.mio;
+package com.mio.modpack;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,19 +16,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
+import com.mio.download.DownloadCallback;
 import com.mio.adapter.FileAdapter;
+import com.mio.download.DownloadInfo;
 import com.mio.mod.curseforge.CurseforgeAPI;
-import com.mio.modpack.CurseforgeModpackManifest;
 
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,11 +36,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
-public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Files>, Integer, Map<String, String>> {
+public class MioDownloadModPackTask extends AsyncTask<List<CurseforgeModpackManifest.Files>, Integer, Map<String, String>> {
 
     private final WeakReference<Activity> ctx;
     private Map<String, String> failedFile;//下载失败的文件
-    private Feedback feedback;//回调
+    private DownloadCallback callback;//回调
     private int maxTask = 10;//最大任务数
     private FileAdapter fileAdapter;
     private TextView textInfo;
@@ -53,15 +50,10 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
     private String modsPath;
     private final ConcurrentHashMap<Thread, byte[]> mThreadBuffers = new ConcurrentHashMap<>(maxTask);
 
-    public abstract static class Feedback {
-        public abstract void onFinished(Map<String, String> failedFile);
 
-        public abstract void onCancelled();
-    }
-
-    public MioDownloadTask(Activity ctx, Feedback feedback) {
-        this.ctx = new WeakReference<Activity>(ctx);
-        this.feedback = feedback;
+    public MioDownloadModPackTask(Activity ctx, DownloadCallback callback) {
+        this.ctx = new WeakReference<>(ctx);
+        this.callback = callback;
         failedFile = new ArrayMap<>();
     }
 
@@ -194,13 +186,13 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
     @Override
     public void onPostExecute(Map<String, String> result) {
         mDialog.dismiss();
-        feedback.onFinished(result);
+        callback.onFinished(result);
     }
 
     @Override
     protected void onCancelled(Map<String, String> result) {
         mDialog.dismiss();
-        feedback.onCancelled();
+        callback.onCancelled();
     }
     private byte[] getByteBuffer(){
         byte[] buffer = mThreadBuffers.get(Thread.currentThread());
@@ -211,11 +203,4 @@ public class MioDownloadTask extends AsyncTask<List<CurseforgeModpackManifest.Fi
         return buffer;
     }
 
-    public class DownloadInfo {
-        public String url;
-        public String name;
-        public String path;
-        public int progress = 0;
-        public String speed;
-    }
 }

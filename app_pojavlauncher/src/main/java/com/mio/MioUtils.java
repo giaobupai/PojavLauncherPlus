@@ -7,7 +7,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.gson.Gson;
+import com.mio.download.DownloadCallback;
 import com.mio.modpack.CurseforgeModpackManifest;
+import com.mio.modpack.MioDownloadModPackTask;
 
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.Tools;
@@ -122,7 +124,7 @@ public class MioUtils {
                 CurseforgeModpackManifest modpackManifest=new Gson().fromJson(Tools.read(manifest.getAbsolutePath()),CurseforgeModpackManifest.class);
                 List<CurseforgeModpackManifest.Files> filesList=modpackManifest.getFiles();
                 activity.runOnUiThread(()->dialog.dismiss());
-                MioDownloadTask mioDownloadTask=new MioDownloadTask(activity, new MioDownloadTask.Feedback() {
+                MioDownloadModPackTask mioDownloadModPackTask =new MioDownloadModPackTask(activity, new DownloadCallback() {
                     @Override
                     public void onFinished(Map<String, String> failedFile) {
                         CurseforgeModpackManifest.Minecraft minecraft = modpackManifest.getMinecraft();
@@ -141,8 +143,8 @@ public class MioUtils {
                         Toast.makeText(activity,"已取消下载",Toast.LENGTH_LONG).show();
                     }
                 });
-                mioDownloadTask.setModsPath(manifest.getParent()+"/mods/");
-                mioDownloadTask.execute(filesList);
+                mioDownloadModPackTask.setModsPath(manifest.getParent()+"/mods/");
+                mioDownloadModPackTask.execute(filesList);
 
             }catch(IOException e) {
                 activity.runOnUiThread(dialog::dismiss);

@@ -21,6 +21,7 @@ import com.mio.adapter.VersionListAdapter;
 import com.mio.download.FabricDownload;
 import com.mio.download.FabricLoaderDownload;
 import com.mio.download.ForgeDownload;
+import com.mio.download.MioDownloadTask;
 import com.mio.download.OptifineDownload;
 
 import net.kdt.pojavlaunch.JMinecraftVersionList;
@@ -186,6 +187,10 @@ public class MioInstallFragment extends Fragment {
             } else {
                 Toast.makeText(requireContext(),"未选择MC版本",Toast.LENGTH_SHORT).show();
             }
+        });
+
+        installButton.setOnClickListener(v->{
+
         });
 
     }
