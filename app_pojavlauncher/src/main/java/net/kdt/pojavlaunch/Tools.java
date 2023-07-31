@@ -189,7 +189,6 @@ public final class Tools {
         String launchClassPath = generateLaunchClassPath(versionInfo, versionId);
 
         List<String> javaArgList = new ArrayList<>();
-        javaArgList.add("-Dorg.lwjgl.util.NoChecks=true");
 
         if (!Objects.isNull(minecraftAccount.baseUrl)&&!minecraftAccount.baseUrl.equals("0")){
             if(minecraftAccount.baseUrl.contains("auth.mc-user.com")){
