@@ -181,6 +181,9 @@ public class JREUtils {
         envMap.put("TMPDIR", Tools.DIR_CACHE.getAbsolutePath());
         envMap.put("LIBGL_MIPMAP", "3");
 
+        envMap.put("MESA_GLSL_VERSION_OVERRIDE", "460");
+        envMap.put("MESA_GL_VERSION_OVERRIDE", "4.6");
+
         // Prevent OptiFine (and other error-reporting stuff in Minecraft) from balooning the log
         envMap.put("LIBGL_NOERROR", "1");
 
